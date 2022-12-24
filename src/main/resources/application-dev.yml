@@ -5,10 +5,10 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
     hibernate:
       ddl-auto: validate
 
@@ -18,3 +18,9 @@ spring:
   h2:
     console:
       enabled: true
+
+logging:
+  level:
+    sql: debug
+    web: debug
+    kg.musabaev.megalabnews.service.impl: debug

@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "posts", indexes = {
@@ -39,7 +41,8 @@ public class Post {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "posts_tags", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "tag")
-    List<String> tags = new ArrayList<>();
+    @Fetch(FetchMode.SUBSELECT)
+    Set<String> tags = new HashSet<>();
 
     @Lob
     @Column(nullable = false, columnDefinition = "text")
