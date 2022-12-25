@@ -23,3 +23,5 @@ https://stackoverflow.com/questions/65757777/how-to-fetch-multiple-lists-with-en
 https://stackoverflow.com/questions/33279153/rest-api-file-ie-images-processing-best-practices
 
 https://spring.io/guides/gs/uploading-files/
+
+https://stackoverflow.com/questions/5245682/how-to-manage-the-transactionwhich-includes-file-io-when-an-ioexception-is-thr

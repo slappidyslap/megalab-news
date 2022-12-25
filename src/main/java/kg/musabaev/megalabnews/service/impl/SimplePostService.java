@@ -142,6 +142,7 @@ public class SimplePostService implements PostService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Resource getImageByFilename(String imageFilename) {
 		try {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());
