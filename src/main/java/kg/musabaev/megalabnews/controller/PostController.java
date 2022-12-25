@@ -47,17 +47,17 @@ public class PostController {
 		postService.deleteById(postId);
 	}
 
-	@PostMapping("/covers")
-	ResponseEntity<String> uploadCoverForPost(@RequestPart(name = "cover") MultipartFile cover) {
-		return ResponseEntity.ok(postService.uploadCover(cover));
+	@PostMapping("/images")
+	ResponseEntity<String> uploadImageForPost(@RequestPart(name = "image") MultipartFile image) {
+		return ResponseEntity.ok(postService.uploadImage(image));
 	}
 
-	@GetMapping("/covers/{coverPath}")
-	ResponseEntity<Resource> getPostCoverByCoverPath(@PathVariable String coverPath) {
-		Resource cover = postService.getCoverByCoverPath(coverPath);
+	@GetMapping("/images/{imageFilename}")
+	ResponseEntity<Resource> getPostImageByFilename(@PathVariable String imageFilename) {
+		Resource image = postService.getImageByFilename(imageFilename);
 		return ResponseEntity
 				.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cover.getFilename() + "\"")
-				.body(cover);
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + image.getFilename() + "\"")
+				.body(image);
 	}
 }

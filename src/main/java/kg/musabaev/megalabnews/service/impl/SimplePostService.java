@@ -35,7 +35,7 @@ public class SimplePostService implements PostService {
 	private final PostDtoPostModelMapper postDtoPostModelMapper;
 	private final PostRepo postRepo;
 
-	private final Path storage = Path.of("storage").resolve("post-cover");
+	private final Path storage = Path.of("storage").resolve("post-image");
 
 	@Override
 	@Transactional
@@ -90,31 +90,31 @@ public class SimplePostService implements PostService {
 	}
 
 	@Override
-	public String uploadCover(MultipartFile cover) {
-		String originalFilename = cover.getOriginalFilename();
+	public String uploadImage(MultipartFile image) {
+		String originalFilename = image.getOriginalFilename();
 		String uniqueFilename = UUID.randomUUID() + "_" + originalFilename;
-		Path coverPath = storage.resolve(uniqueFilename);
+		Path path = storage.resolve(uniqueFilename);
 		try {
-			cover.transferTo(coverPath);
+			image.transferTo(path);
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при сохранении файла: {}", e.getMessage());
+			log.warn("Произошла ошибка при сохранении изображения: {}", e.getMessage());
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		log.debug("Новая обложка публикации сохранен в: {}", coverPath);
+		log.debug("Новая изображение публикации сохранен в: {}", path);
 
 		return uniqueFilename;
 	}
 
 	@Override
-	public Resource getCoverByCoverPath(String coverPath) {
+	public Resource getImageByFilename(String imageFilename) {
 		try {
-			var resource = new UrlResource(storage.resolve(coverPath).toUri());
+			var image = new UrlResource(storage.resolve(imageFilename).toUri());
 
-			log.debug("Обложка с названием {} загружен", resource.getFilename());
+			log.debug("Изображение с названием {} загружен", image.getFilename());
 
-			return resource;
+			return image;
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при загрузке файла: {}", e.getMessage());
+			log.warn("Произошла ошибка при загрузке изображения: {}", e.getMessage());
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

@@ -10,6 +10,6 @@ public record NewPostResponse(
 		LocalDate createdDate,
 		List<String> tags,
 		String content,
-		String coverPath
+		String imageFilename
 ) {
 }

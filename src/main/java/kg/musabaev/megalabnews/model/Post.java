@@ -50,5 +50,5 @@ public class Post {
 
 	@Column(length = 2000)
 	@Nullable
-	String coverPath;
+	String imageFilename;
 }

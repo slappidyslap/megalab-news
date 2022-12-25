@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-cover-path-to-image-filename-in-post-table
+      author: Eldiyar
+      changes:
+        - renameColumn:
+            tableName: posts
+            oldColumnName: cover_path
+            newColumnName: image_filename

@@ -20,7 +20,7 @@ public interface PostService {
 
 	void deleteById(Long postId);
 
-	String uploadCover(MultipartFile cover);
+	String uploadImage(MultipartFile image);
 
-	Resource getCoverByCoverPath(String coverPath);
+	Resource getImageByFilename(String imageFilename);
 }

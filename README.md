@@ -21,3 +21,5 @@ https://stackoverflow.com/questions/32984799/fetchmode-join-vs-subselect
 https://stackoverflow.com/questions/65757777/how-to-fetch-multiple-lists-with-entitygraph
 
 https://stackoverflow.com/questions/33279153/rest-api-file-ie-images-processing-best-practices
+
+https://spring.io/guides/gs/uploading-files/

@@ -18,6 +18,6 @@ public record NewPostRequest(
 		List<String> tags,
 		@NotNull
 		@NotBlank
-		String coverPath
+		String imageFilename
 ) {
 }
