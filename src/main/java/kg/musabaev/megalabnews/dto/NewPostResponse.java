@@ -9,6 +9,7 @@ public record NewPostResponse(
 		String description,
 		LocalDate createdDate,
 		List<String> tags,
-		String content
+		String content,
+		String coverPath
 ) {
 }

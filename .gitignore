@@ -35,3 +35,4 @@ build/
 *.db
 .jpb
 dump.*
+storage

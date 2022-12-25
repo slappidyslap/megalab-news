@@ -19,6 +19,10 @@ spring:
     console:
       enabled: true
 
+  servlet:
+    multipart:
+      max-file-size: 1MB
+
 logging:
   level:
     sql: debug

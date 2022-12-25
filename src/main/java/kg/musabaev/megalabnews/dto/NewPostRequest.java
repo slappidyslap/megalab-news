@@ -15,5 +15,8 @@ public record NewPostRequest(
 		@NotBlank
         String content,
 		@NotNull
-        List<String> tags
+        List<String> tags,
+		@NotNull
+		@NotBlank
+		String coverPath
 ) {}

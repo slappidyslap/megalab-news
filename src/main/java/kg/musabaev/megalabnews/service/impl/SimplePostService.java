@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.dto.NewPostRequest;
 import kg.musabaev.megalabnews.dto.NewPostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
@@ -11,15 +12,23 @@ import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -29,6 +38,8 @@ public class SimplePostService implements PostService {
 
     private final PostDtoPostModelMapper postDtoPostModelMapper;
     private final PostRepo postRepo;
+
+	private final Path storage = Path.of("storage").resolve("post-cover");
 
     @Override
     @Transactional
@@ -81,4 +92,34 @@ public class SimplePostService implements PostService {
 
         postRepo.deleteById(postId);
     }
+
+	@Override
+	public String uploadCover(MultipartFile cover) {
+		String originalFilename = cover.getOriginalFilename();
+		String uniqueFilename = UUID.randomUUID() + "_" + originalFilename;
+		Path coverPath = storage.resolve(uniqueFilename);
+		try {
+			cover.transferTo(coverPath);
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при сохранении файла: {}", e.getMessage());
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+        log.debug("Новая обложка публикации сохранен в: {}", coverPath);
+
+		return uniqueFilename;
+	}
+
+	@Override
+	public Resource getCoverByCoverPath(String coverPath) {
+		try {
+			var resource = new UrlResource(storage.resolve(coverPath).toUri());
+
+			log.debug("Обложка с названием {} загружен", resource.getFilename());
+
+			return resource;
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при загрузке файла: {}", e.getMessage());
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
