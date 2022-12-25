@@ -4,24 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.musabaev.megalabnews.Application;
 import kg.musabaev.megalabnews.dto.NewPostRequest;
 import kg.musabaev.megalabnews.repository.PostRepo;
-import kg.musabaev.megalabnews.service.PostService;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,21 +27,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-		classes = { Application.class, PostController.class }
+		classes = {Application.class, PostController.class}
 )
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PostControllerTest {
 
+	private final String apiPrefix = "/api/v1/posts";
 	@Autowired
 	private MockMvc mvc;
 	@Autowired
 	private ObjectMapper objectMapper;
 	@Autowired
 	private PostRepo repo;
-
-	private final String apiPrefix = "/api/v1/posts";
 
 	@Test
 	@Sql("/initDbForPostControllerTest.sql")
@@ -102,7 +96,7 @@ class PostControllerTest {
 
 	@Test
 	@Order(3)
-	void shouldBeStatus400_whenConstraintViolation () throws Exception {
+	void shouldBeStatus400_whenConstraintViolation() throws Exception {
 		final var newPost = new NewPostRequest(
 				null,
 				null,

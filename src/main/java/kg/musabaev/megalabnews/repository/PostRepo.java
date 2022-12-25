@@ -13,10 +13,10 @@ import java.util.Set;
 @Repository
 public interface PostRepo extends JpaRepository<Post, Long> {
 
-    <T> Page<T> findAllProjectedBy(Class<T> type, Pageable pageable);
+	<T> Page<T> findAllProjectedBy(Class<T> type, Pageable pageable);
 
-    boolean existsByTitle(String title);
+	boolean existsByTitle(String title);
 
-    @Query(value = "SELECT tag FROM posts_tags WHERE post_id = :postId", nativeQuery = true)
-    Set<String> findTagsByPostId(@Param("postId") Long postId);
+	@Query(value = "SELECT tag FROM posts_tags WHERE post_id = :postId", nativeQuery = true)
+	Set<String> findTagsByPostId(@Param("postId") Long postId);
 }

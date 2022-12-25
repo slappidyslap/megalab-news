@@ -22,42 +22,42 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin(originPatterns = "*")
 public class PostController {
 
-    private final PostService postService;
+	private final PostService postService;
 
-    @PostMapping
-    ResponseEntity<NewPostResponse> savePost(@Valid @RequestBody NewPostRequest dto) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(postService.save(dto));
-    }
+	@PostMapping
+	ResponseEntity<NewPostResponse> savePost(@Valid @RequestBody NewPostRequest dto) {
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(postService.save(dto));
+	}
 
-    @GetMapping
-    ResponseEntity<PostPageResponse> getAllPosts(@PageableDefault(5) Pageable pageable) {
-        return ResponseEntity.ok(postService.getAll(pageable));
-    }
+	@GetMapping
+	ResponseEntity<PostPageResponse> getAllPosts(@PageableDefault(5) Pageable pageable) {
+		return ResponseEntity.ok(postService.getAll(pageable));
+	}
 
-    @GetMapping("/{postId}")
-    ResponseEntity<Post> getPostById(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getById(postId));
-    }
+	@GetMapping("/{postId}")
+	ResponseEntity<Post> getPostById(@PathVariable Long postId) {
+		return ResponseEntity.ok(postService.getById(postId));
+	}
 
-    @DeleteMapping("/{postId}")
-    @ResponseStatus(HttpStatus.OK)
-    void deletePostById(@PathVariable Long postId) {
-        postService.deleteById(postId);
-    }
+	@DeleteMapping("/{postId}")
+	@ResponseStatus(HttpStatus.OK)
+	void deletePostById(@PathVariable Long postId) {
+		postService.deleteById(postId);
+	}
 
-    @PostMapping("/covers")
-    ResponseEntity<String> uploadCoverForPost(@RequestPart(name = "cover") MultipartFile cover) {
-        return ResponseEntity.ok(postService.uploadCover(cover));
-    }
+	@PostMapping("/covers")
+	ResponseEntity<String> uploadCoverForPost(@RequestPart(name = "cover") MultipartFile cover) {
+		return ResponseEntity.ok(postService.uploadCover(cover));
+	}
 
-    @GetMapping("/covers/{coverPath}")
-    ResponseEntity<Resource> getPostCoverByCoverPath(@PathVariable String coverPath) {
-        Resource cover = postService.getCoverByCoverPath(coverPath);
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cover.getFilename() + "\"")
-                .body(cover);
-    }
+	@GetMapping("/covers/{coverPath}")
+	ResponseEntity<Resource> getPostCoverByCoverPath(@PathVariable String coverPath) {
+		Resource cover = postService.getCoverByCoverPath(coverPath);
+		return ResponseEntity
+				.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cover.getFilename() + "\"")
+				.body(cover);
+	}
 }

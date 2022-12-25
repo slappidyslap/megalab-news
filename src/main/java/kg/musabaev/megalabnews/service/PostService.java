@@ -12,13 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface PostService {
 
-    NewPostResponse save(NewPostRequest newPostRequest);
+	NewPostResponse save(NewPostRequest newPostRequest);
 
-    PostPageResponse getAll(Pageable pageable);
+	PostPageResponse getAll(Pageable pageable);
 
-    Post getById(Long postId);
+	Post getById(Long postId);
 
-    void deleteById(Long postId);
+	void deleteById(Long postId);
 
 	String uploadCover(MultipartFile cover);
 

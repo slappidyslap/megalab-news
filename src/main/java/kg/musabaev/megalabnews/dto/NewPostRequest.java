@@ -8,15 +8,16 @@ import java.util.List;
 public record NewPostRequest(
 		@NotNull
 		@NotBlank
-        String title,
+		String title,
 		@NotNull
-        String description,
+		String description,
 		@NotNull
 		@NotBlank
-        String content,
+		String content,
 		@NotNull
-        List<String> tags,
+		List<String> tags,
 		@NotNull
 		@NotBlank
 		String coverPath
-) {}
+) {
+}

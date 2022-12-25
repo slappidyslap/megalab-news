@@ -1,4 +1,3 @@
-
 ## Полезные ссылки
 
 https://stackoverflow.com/questions/62045161/how-to-use-clob-with-hibernate-and-both-postgres-and-h2
