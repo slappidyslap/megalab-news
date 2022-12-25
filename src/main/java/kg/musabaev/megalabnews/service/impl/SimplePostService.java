@@ -96,11 +96,7 @@ public class SimplePostService implements PostService {
 		return postRepo.findById(postId).map(post -> {
 			deleteImageInStorageIfExists(dto.imageFilename(), post);
 
-			post.setTitle(dto.title()); // TODO переделать
-			post.setDescription(dto.description());
-			post.setTags(dto.tags());
-			post.setContent(dto.content());
-			post.setImageFilename(dto.imageFilename());
+			postDtoPostModelMapper.updatePostModelByPostDto(dto, post);
 
 			var responseDto = postDtoPostModelMapper.toPostDto(postRepo.save(post));
 
