@@ -24,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -65,14 +64,13 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional(readOnly = true)
 	public Post getById(Long postId) {
-		Optional<Post> optionalPost = postRepo.findById(postId);
-
-		optionalPost.ifPresent(post -> {
+		return postRepo.findById(postId).map(post -> {
 			post.setTags(postRepo.findTagsByPostId(postId));
-			log.debug("Найдена публикация с id: {}", post);
-		});
 
-		return optionalPost.orElseThrow(() -> {
+			log.debug("Найдена публикация с id: {}", post);
+
+			return post;
+		}).orElseThrow(() -> {
 			log.debug("Публикация с id {} не найден", postId);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		});
@@ -81,22 +79,28 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	public void deleteById(Long postId) {
-		if (!postRepo.existsById(postId)) {
+		postRepo.findById(postId).ifPresentOrElse(post -> {
+			postRepo.deleteById(postId);
+			deleteImageInStorageIfExists(post.getImageFilename());
+
+			log.debug("Публикации с id {} удален", postId);
+		}, () -> {
 			log.debug("Публикация с id {} не найден", postId);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		log.debug("Публикации с id {} удален", postId);
-
-		postRepo.deleteById(postId);
+		});
 	}
 
 	@Override
 	@Transactional
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
-			deleteImageInStorageIfExists(dto.imageFilename(), post);
+			String imageFilename = dto.imageFilename();
+			String postImageFilename = post.getImageFilename();
 
 			postDtoPostModelMapper.updatePostModelByPostDto(dto, post);
+			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
+			if (postImageFilename != null && !imageFilename.equals(postImageFilename))
+				deleteImageInStorageIfExists(postImageFilename);
 
 			var responseDto = postDtoPostModelMapper.toPostDto(postRepo.save(post));
 
@@ -109,20 +113,15 @@ public class SimplePostService implements PostService {
 		});
 	}
 
-	private void deleteImageInStorageIfExists(String imageFilename, Post post) {
-		String postImageFilename = post.getImageFilename();
-		if (
-				imageFilename != null &&
-				postImageFilename != null &&
-				!imageFilename.equals(postImageFilename))
-			try {
-				boolean isDeleted = Files.deleteIfExists(storage.resolve(postImageFilename));
+	private void deleteImageInStorageIfExists(String imageFilename) {
+		try {
+			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
 
-				if(isDeleted) log.debug("Изображение с названием {} удален", postImageFilename);
-			} catch (IOException e) {
-				log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage());
-				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage());
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
