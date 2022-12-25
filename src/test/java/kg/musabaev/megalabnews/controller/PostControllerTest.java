@@ -2,7 +2,7 @@ package kg.musabaev.megalabnews.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.musabaev.megalabnews.Application;
-import kg.musabaev.megalabnews.dto.NewPostRequest;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -17,7 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -58,11 +58,12 @@ class PostControllerTest {
 	@Test
 	@Order(1)
 	void shouldBeStatus201_whenSuchTitleNotExists() throws Exception {
-		final var newPost = new NewPostRequest(
+		final var newPost = new NewOrUpdatePostRequest(
 				"spring 1",
 				"desc",
 				"content",
-				List.of("java", "persistence")
+				Set.of("java", "persistence"),
+				null
 		);
 		mvc.perform(post(apiPrefix)
 						.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -81,11 +82,12 @@ class PostControllerTest {
 	@Test
 	@Order(2)
 	void shouldBeStatus409_whenSuchTitleAlreadyExists() throws Exception {
-		final var newPost = new NewPostRequest(
+		final var newPost = new NewOrUpdatePostRequest(
 				"spring 1",
 				"desc",
 				"content",
-				List.of("java", "persistence")
+				Set.of("java", "persistence"),
+				null
 		);
 		mvc.perform(post(apiPrefix)
 						.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -97,7 +99,8 @@ class PostControllerTest {
 	@Test
 	@Order(3)
 	void shouldBeStatus400_whenConstraintViolation() throws Exception {
-		final var newPost = new NewPostRequest(
+		final var newPost = new NewOrUpdatePostRequest(
+				null,
 				null,
 				null,
 				null,

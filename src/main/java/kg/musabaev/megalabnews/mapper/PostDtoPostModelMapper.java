@@ -1,13 +1,13 @@
 package kg.musabaev.megalabnews.mapper;
 
-import kg.musabaev.megalabnews.dto.NewPostRequest;
-import kg.musabaev.megalabnews.dto.NewPostResponse;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.model.Post;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface PostDtoPostModelMapper {
-	Post toPostModel(NewPostRequest newPostRequest);
+	Post toPostModel(NewOrUpdatePostRequest newOrUpdatePostRequest);
 
-	NewPostResponse toPostDto(Post post);
+	NewOrUpdatePostResponse toPostDto(Post post);
 }

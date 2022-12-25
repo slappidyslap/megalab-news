@@ -1,14 +1,14 @@
 package kg.musabaev.megalabnews.dto;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
-public record NewPostResponse(
+public record NewOrUpdatePostResponse(
 		Long id,
 		String title,
 		String description,
 		LocalDate createdDate,
-		List<String> tags,
+		Set<String> tags,
 		String content,
 		String imageFilename
 ) {

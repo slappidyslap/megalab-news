@@ -3,9 +3,9 @@ package kg.musabaev.megalabnews.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
-public record NewPostRequest(
+public record NewOrUpdatePostRequest(
 		@NotNull
 		@NotBlank
 		String title,
@@ -15,8 +15,7 @@ public record NewPostRequest(
 		@NotBlank
 		String content,
 		@NotNull
-		List<String> tags,
-		@NotNull
+		Set<String> tags,
 		@NotBlank
 		String imageFilename
 ) {

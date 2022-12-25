@@ -1,7 +1,7 @@
 package kg.musabaev.megalabnews.service;
 
-import kg.musabaev.megalabnews.dto.NewPostRequest;
-import kg.musabaev.megalabnews.dto.NewPostResponse;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.model.Post;
 import org.springframework.core.io.Resource;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface PostService {
 
-	NewPostResponse save(NewPostRequest newPostRequest);
+	NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest);
 
 	PostPageResponse getAll(Pageable pageable);
 
@@ -23,4 +23,6 @@ public interface PostService {
 	String uploadImage(MultipartFile image);
 
 	Resource getImageByFilename(String imageFilename);
+
+	NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto);
 }

@@ -1,7 +1,7 @@
 package kg.musabaev.megalabnews.service.impl;
 
-import kg.musabaev.megalabnews.dto.NewPostRequest;
-import kg.musabaev.megalabnews.dto.NewPostResponse;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
+import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.mapper.PostDtoPostModelMapper;
 import kg.musabaev.megalabnews.model.Post;
@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,12 +40,12 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional
-	public NewPostResponse save(NewPostRequest newPostRequest) {
-		if (postRepo.existsByTitle(newPostRequest.title())) {
-			log.debug("Публикация с title {} уже существует", newPostRequest.title());
+	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
+		if (postRepo.existsByTitle(newOrUpdatePostRequest.title())) {
+			log.debug("Публикация с title {} уже существует", newOrUpdatePostRequest.title());
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
-		Post newPost = postDtoPostModelMapper.toPostModel(newPostRequest);
+		Post newPost = postDtoPostModelMapper.toPostModel(newOrUpdatePostRequest);
 
 		log.debug("Новая публикация: {}", newPost);
 
@@ -87,6 +88,45 @@ public class SimplePostService implements PostService {
 		log.debug("Публикации с id {} удален", postId);
 
 		postRepo.deleteById(postId);
+	}
+
+	@Override
+	@Transactional
+	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
+		return postRepo.findById(postId).map(post -> {
+			deleteImageInStorageIfExists(dto.imageFilename(), post);
+
+			post.setTitle(dto.title()); // TODO переделать
+			post.setDescription(dto.description());
+			post.setTags(dto.tags());
+			post.setContent(dto.content());
+			post.setImageFilename(dto.imageFilename());
+
+			var responseDto = postDtoPostModelMapper.toPostDto(postRepo.save(post));
+
+			log.debug("Публикация с id {} обновлен", postId);
+
+			return responseDto;
+		}).orElseThrow(() -> {
+			log.debug("Публикация с id {} не найден", postId);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		});
+	}
+
+	private void deleteImageInStorageIfExists(String imageFilename, Post post) {
+		String postImageFilename = post.getImageFilename();
+		if (
+				imageFilename != null &&
+				postImageFilename != null &&
+				!imageFilename.equals(postImageFilename))
+			try {
+				boolean isDeleted = Files.deleteIfExists(storage.resolve(postImageFilename));
+
+				if(isDeleted) log.debug("Изображение с названием {} удален", postImageFilename);
+			} catch (IOException e) {
+				log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage());
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 
 	@Override
