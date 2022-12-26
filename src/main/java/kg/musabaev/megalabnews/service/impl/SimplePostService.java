@@ -10,6 +10,8 @@ import kg.musabaev.megalabnews.repository.projection.PostWithoutContent;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -37,6 +39,8 @@ public class SimplePostService implements PostService {
 
 	private final Path storage = Path.of("storage").resolve("post-image");
 
+	public static final String postItemCacheName = "postItem";
+
 	@Override
 	@Transactional
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
@@ -52,6 +56,9 @@ public class SimplePostService implements PostService {
 	}
 
 	@Override
+	/*@Cacheable(
+			cacheNames = "postPage",
+			key = "#pageable.pageSize + '-' + #pageable.pageNumber + '-' + #pageable.sort.iterator() + '-'")*/
 	@Transactional(readOnly = true)
 	public PostPageResponse getAll(Pageable pageable) {
 		Page<PostWithoutContent> postPage = postRepo.findAllProjectedBy(PostWithoutContent.class, pageable);
@@ -63,6 +70,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(postItemCacheName)
 	public Post getById(Long postId) {
 		return postRepo.findById(postId).map(post -> {
 			post.setTags(postRepo.findTagsByPostId(postId));
@@ -78,6 +86,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional
+	@CacheEvict(postItemCacheName)
 	public void deleteById(Long postId) {
 		postRepo.findById(postId).ifPresentOrElse(post -> {
 			postRepo.deleteById(postId);
@@ -90,6 +99,7 @@ public class SimplePostService implements PostService {
 		});
 	}
 
+	// see kg.musabaev.megalabnews.aspect.PostCachingAspect.updateCachePostItem
 	@Override
 	@Transactional
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
@@ -113,6 +123,7 @@ public class SimplePostService implements PostService {
 		});
 	}
 
+//	@CacheEvict("postImage")
 	private void deleteImageInStorageIfExists(String imageFilename) {
 		try {
 			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
@@ -142,6 +153,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
+//	@Cacheable("postImage")
 	public Resource getImageByFilename(String imageFilename) {
 		try {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());

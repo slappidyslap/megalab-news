@@ -13,5 +13,7 @@ public interface PostDtoPostModelMapper {
 
 	void updatePostModelByPostDto(NewOrUpdatePostRequest dto, @MappingTarget Post model);
 
+	void updatePostModelByPostDto(NewOrUpdatePostResponse dto, @MappingTarget Post model);
+
 	NewOrUpdatePostResponse toPostDto(Post post);
 }
