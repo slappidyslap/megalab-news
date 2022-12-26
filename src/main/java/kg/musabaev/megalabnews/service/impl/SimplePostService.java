@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
@@ -11,6 +12,7 @@ import kg.musabaev.megalabnews.repository.projection.PostWithoutContent;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
@@ -39,9 +41,20 @@ public class SimplePostService implements PostService {
 	private final PostDtoPostModelMapper postDtoPostModelMapper;
 	private final PostRepo postRepo;
 
-	private final Path storage = Path.of("storage").resolve("post-image");
-
 	public static final String postItemCacheName = "postItem";
+
+	@Value("${app.storage.folder-name}")
+	private String storageFolderName;
+	@Value("${app.storage.post-image-folder-name}")
+	private String postImageFolderName;
+
+	private Path storage;
+
+	// Этот метод выполниться после обработки аннотации @Value, что значит не будет null
+	@PostConstruct
+	void setUp() {
+		storage = Path.of(storageFolderName, postImageFolderName);
+	}
 
 	@Override
 	@Transactional
