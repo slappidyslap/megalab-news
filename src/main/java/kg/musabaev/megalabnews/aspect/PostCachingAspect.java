@@ -26,7 +26,7 @@ public class PostCachingAspect {
 
 	@AfterReturning(
 			pointcut = "execution(" +
-					"public * kg.musabaev.megalabnews.service.impl.SimplePostService.update())",
+					"public * kg.musabaev.megalabnews.service.impl.SimplePostService.update(..))",
 			returning = "responseDto")
 	void updateCachePostItem(JoinPoint joinPoint, NewOrUpdatePostResponse responseDto) {
 		Long postId = (Long) joinPoint.getArgs()[0];
