@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.service.impl;
 
+import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,9 +58,6 @@ public class SimplePostService implements PostService {
 	}
 
 	@Override
-	/*@Cacheable(
-			cacheNames = "postPage",
-			key = "#pageable.pageSize + '-' + #pageable.pageNumber + '-' + #pageable.sort.iterator() + '-'")*/
 	@Transactional(readOnly = true)
 	public PostPageResponse getAll(Pageable pageable) {
 		Page<PostWithoutContent> postPage = postRepo.findAllProjectedBy(PostWithoutContent.class, pageable);
@@ -90,7 +89,7 @@ public class SimplePostService implements PostService {
 	public void deleteById(Long postId) {
 		postRepo.findById(postId).ifPresentOrElse(post -> {
 			postRepo.deleteById(postId);
-			deleteImageInStorageIfExists(post.getImageFilename());
+			deleteImageInStorageIfExists(getLastPathSegmentOrNull(post.getImageUrl()));
 
 			log.debug("Публикации с id {} удален", postId);
 		}, () -> {
@@ -104,8 +103,8 @@ public class SimplePostService implements PostService {
 	@Transactional
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
-			String imageFilename = dto.imageFilename();
-			String postImageFilename = post.getImageFilename();
+			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
+			String postImageFilename = getLastPathSegmentOrNull(post.getImageUrl());
 
 			postDtoPostModelMapper.updatePostModelByPostDto(dto, post);
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
@@ -125,13 +124,13 @@ public class SimplePostService implements PostService {
 
 //	@CacheEvict("postImage")
 	private void deleteImageInStorageIfExists(String imageFilename) {
+		if (imageFilename == null) return;
 		try {
 			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
 
 			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage());
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage(), e);
 		}
 	}
 
@@ -139,16 +138,34 @@ public class SimplePostService implements PostService {
 	public String uploadImage(MultipartFile image) {
 		String originalFilename = image.getOriginalFilename();
 		String uniqueFilename = UUID.randomUUID() + "_" + originalFilename;
-		Path path = storage.resolve(uniqueFilename);
+		Path pathToSave = storage.resolve(uniqueFilename);
+		String imageUrl = buildUrlForImageByMethodName(PostController.class, "getPostImageByFilename", uniqueFilename);
 		try {
-			image.transferTo(path);
+			image.transferTo(pathToSave);
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при сохранении изображения: {}", e.getMessage());
+			log.warn("Произошла ошибка при сохранении изображения: {}", e.getMessage(), e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		log.debug("Новая изображение публикации сохранен в: {}", path);
+		log.debug("Новая изображение публикации сохранен в: {}", pathToSave);
 
-		return uniqueFilename;
+		return imageUrl;
+	}
+
+	private String buildUrlForImageByMethodName(Class<?> controller, String methodName, String filename) {
+		try {
+			return MvcUriComponentsBuilder.fromMethodName(
+					controller,
+					methodName,
+					filename
+					).toUriString();
+		} catch (IllegalArgumentException e) {
+			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private String getLastPathSegmentOrNull(String url) {
+		return url != null ? url.substring(url.lastIndexOf("/") + 1) : null;
 	}
 
 	@Override
@@ -162,7 +179,7 @@ public class SimplePostService implements PostService {
 
 			return image;
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при загрузке изображения: {}", e.getMessage());
+			log.warn("Произошла ошибка при загрузке изображения: {}", e.getMessage(), e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

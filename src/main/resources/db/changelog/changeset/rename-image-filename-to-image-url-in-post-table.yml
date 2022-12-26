@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-image-filename-to-image-url-in-post-table
+      author: Eldiyar
+      changes:
+        - renameColumn:
+            tableName: posts
+            oldColumnName: image_filename
+            newColumnName: image_url

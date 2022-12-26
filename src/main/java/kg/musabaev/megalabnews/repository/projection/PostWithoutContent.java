@@ -14,5 +14,5 @@ public interface PostWithoutContent {
 
 	LocalDate getCreatedDate();
 
-	String getImageFilename();
+	String getImageUrl();
 }

@@ -5,3 +5,6 @@ databaseChangeLog:
   - include:
       file: changeset/rename-cover-path-to-image-filename-in-post-table.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/rename-image-filename-to-image-url-in-post-table.yml
+      relativeToChangelogFile: true

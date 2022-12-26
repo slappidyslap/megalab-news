@@ -10,6 +10,6 @@ public record NewOrUpdatePostResponse(
 		LocalDate createdDate,
 		Set<String> tags,
 		String content,
-		String imageFilename
+		String imageUrl
 ) {
 }
