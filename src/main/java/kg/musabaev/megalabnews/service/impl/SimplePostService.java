@@ -67,7 +67,7 @@ public class SimplePostService implements PostService {
 		return postRepo.findById(postId).map(post -> {
 			post.setTags(postRepo.findTagsByPostId(postId));
 
-			log.debug("Найдена публикация с id: {}", post);
+			log.debug("Найдена публикация с id: {}", post.getId());
 
 			return post;
 		}).orElseThrow(() -> {

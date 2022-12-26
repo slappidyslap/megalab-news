@@ -27,4 +27,14 @@ logging:
   level:
     sql: debug
     web: debug
-    kg.musabaev.megalabnews.service.impl: debug
+    kg.musabaev.megalabnews: debug
+    org.springframework.cache: trace
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+app:
+  cache-enabled: ${CACHE_ENABLED:false}
