@@ -28,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -188,10 +189,15 @@ public class SimplePostService implements PostService {
 		try {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());
 
+			if (!image.exists() || !image.isReadable()) {
+				log.debug("Изображение с названием {} не найден", image.getFilename());
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			}
+
 			log.debug("Изображение с названием {} загружен", image.getFilename());
 
 			return image;
-		} catch (IOException e) {
+		} catch (MalformedURLException e) {
 			log.warn("Произошла ошибка при загрузке изображения: {}", e.getMessage(), e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
