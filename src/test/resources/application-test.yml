@@ -18,4 +18,10 @@ logging:
   level:
     sql: debug
     web: debug
-    kg.musabaev.megalabnews.service.impl: debug
+    kg.musabaev.megalabnews: debug
+
+app:
+  cache-enabled: ${CACHE_ENABLED:false}
+  storage:
+    folder-name: ${STORAGE_FOLDER_NAME:test-storage}
+    post-image-folder-name: ${POST_IMAGE_FOLDER_NAME:post-image}

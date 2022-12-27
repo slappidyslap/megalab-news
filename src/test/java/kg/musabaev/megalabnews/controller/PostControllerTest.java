@@ -1,22 +1,29 @@
 package kg.musabaev.megalabnews.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.musabaev.megalabnews.Application;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.repository.PostRepo;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.FileSystemUtils;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,16 +38,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Log4j2
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 class PostControllerTest {
 
-	private final String apiPrefix = "/api/v1/posts";
+	final String apiPrefix = "/api/v1/posts";
 	@Autowired
-	private MockMvc mvc;
+	MockMvc mvc;
 	@Autowired
-	private ObjectMapper objectMapper;
+	ObjectMapper objectMapper;
 	@Autowired
-	private PostRepo repo;
+	PostRepo repo;
+
+	static String rootFolderName = "test-storage";
+	static String postImageFolderName = "post-image";
+	static Path storage;
+
+	@BeforeAll
+	static void beforeAll() {
+		storage = Path.of(rootFolderName, postImageFolderName);
+		boolean isDirsCreated = storage.toFile().mkdirs();
+		if (isDirsCreated) log.info("{} созданы", storage);
+	}
+
+	@AfterAll
+	static void afterAll() throws IOException {
+		FileSystemUtils.deleteRecursively(Path.of(rootFolderName));
+	}
 
 	@Test
 	@Sql("/initDbForPostControllerTest.sql")
@@ -58,12 +83,27 @@ class PostControllerTest {
 	@Test
 	@Order(1)
 	void shouldBeStatus201_whenSuchTitleNotExists() throws Exception {
+
+		var testFile = new MockMultipartFile(
+				"image",
+				"test1.jpeg",
+				"image/jpeg",
+				"it is test bro".getBytes());
+
+		MvcResult result = mvc.perform(multipart(apiPrefix + "/images")
+						.file(testFile))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().string(endsWith("test1.jpeg")))
+				.andReturn();
+		String imageUrl = result.getResponse().getContentAsString();
+
 		final var newPost = new NewOrUpdatePostRequest(
 				"spring 1",
 				"desc",
 				"content",
 				Set.of("java", "persistence"),
-				null
+				imageUrl
 		);
 		mvc.perform(post(apiPrefix)
 						.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -75,8 +115,9 @@ class PostControllerTest {
 				.andExpect(jsonPath("$.title", is(newPost.title())))
 				.andExpect(jsonPath("$.description", is(newPost.description())))
 				.andExpect(jsonPath("$.content", is(newPost.content())))
-				.andExpect(jsonPath("$.tags", is(newPost.tags())))
-				.andExpect(jsonPath("$.createdDate", is(LocalDate.now().toString())));
+				.andExpect(jsonPath("$.tags", hasItems(newPost.tags().toArray())))
+				.andExpect(jsonPath("$.createdDate", is(LocalDate.now().toString())))
+				.andExpect(jsonPath("$.imageUrl", is(imageUrl)));
 	}
 
 	@Test
@@ -128,7 +169,7 @@ class PostControllerTest {
 	@Test
 	@Order(5)
 	void shouldBeStatus200_whenPostById3Exists() throws Exception {
-		mvc.perform(get(apiPrefix + "/3")
+		MvcResult result = mvc.perform(get(apiPrefix + "/3")
 						.contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -136,8 +177,18 @@ class PostControllerTest {
 				.andExpect(jsonPath("$.title", is("spring 1")))
 				.andExpect(jsonPath("$.description", is("desc")))
 				.andExpect(jsonPath("$.createdDate", is(LocalDate.now().toString())))
-				.andExpect(jsonPath("$.tags", hasItems("java", "persistence")));
+				.andExpect(jsonPath("$.tags", hasItems("java", "persistence")))
+				.andReturn();
+
+		String stringifyJson = result.getResponse().getContentAsString();
+		Map<String, Object> map = objectMapper.readValue(stringifyJson, new TypeReference<>() {});
+		String imageUrl = (String) map.get("imageUrl");
+
+		mvc.perform(get(apiPrefix + "/images/" + imageUrl.substring(imageUrl.lastIndexOf("/") + 1))) // Получаем last сегмент url`а
+				.andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+				.andExpect(status().isOk());
 	}
+
 
 	@Test
 	@Order(5)
