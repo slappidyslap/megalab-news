@@ -31,3 +31,5 @@ https://www.freecodecamp.org/news/how-to-implement-cacheable-pagination-of-frequ
 https://stackoverflow.com/questions/59897491/how-can-i-retrieve-sort-property-and-direction-from-a-spring-data-pageable
 
 https://reflectoring.io/bean-validation-with-spring-boot/
+
+https://sysout.ru/vvedenie-v-aop-v-spring-boot/

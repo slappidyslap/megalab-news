@@ -61,12 +61,9 @@ public class SimplePostService implements PostService {
 	@Transactional
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title())) {
-			log.debug("Публикация с title {} уже существует", newOrUpdatePostRequest.title());
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
 		Post newPost = postDtoPostModelMapper.toPostModel(newOrUpdatePostRequest);
-
-		log.debug("Новая публикация: {}", newPost);
 
 		return postDtoPostModelMapper.toPostDto(postRepo.save(newPost));
 	}
@@ -75,8 +72,6 @@ public class SimplePostService implements PostService {
 	@Transactional(readOnly = true)
 	public PostPageResponse getAll(Pageable pageable) {
 		Page<PostWithoutContent> postPage = postRepo.findAllProjectedBy(PostWithoutContent.class, pageable);
-
-		log.debug("Общее кол-во публикаций: {}", postPage.getTotalElements());
 
 		return new PostPageResponse(postPage);
 	}
@@ -87,12 +82,8 @@ public class SimplePostService implements PostService {
 	public Post getById(Long postId) {
 		return postRepo.findById(postId).map(post -> {
 			post.setTags(postRepo.findTagsByPostId(postId));
-
-			log.debug("Найдена публикация с id: {}", post.getId());
-
 			return post;
 		}).orElseThrow(() -> {
-			log.debug("Публикация с id {} не найден", postId);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		});
 	}
@@ -104,10 +95,7 @@ public class SimplePostService implements PostService {
 		postRepo.findById(postId).ifPresentOrElse(post -> {
 			postRepo.deleteById(postId);
 			deleteImageInStorageIfExists(getLastPathSegmentOrNull(post.getImageUrl()));
-
-			log.debug("Публикации с id {} удален", postId);
 		}, () -> {
-			log.debug("Публикация с id {} не найден", postId);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		});
 	}
@@ -125,13 +113,8 @@ public class SimplePostService implements PostService {
 			if (postImageFilename != null && !imageFilename.equals(postImageFilename))
 				deleteImageInStorageIfExists(postImageFilename);
 
-			var responseDto = postDtoPostModelMapper.toPostDto(postRepo.save(post));
-
-			log.debug("Публикация с id {} обновлен", postId);
-
-			return responseDto;
+			return postDtoPostModelMapper.toPostDto(postRepo.save(post));
 		}).orElseThrow(() -> {
-			log.debug("Публикация с id {} не найден", postId);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		});
 	}
@@ -157,11 +140,8 @@ public class SimplePostService implements PostService {
 		try {
 			image.transferTo(pathToSave);
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при сохранении изображения: {}", e.getMessage(), e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		log.debug("Новая изображение публикации сохранен в: {}", pathToSave);
-
 		return imageUrl;
 	}
 
@@ -190,15 +170,10 @@ public class SimplePostService implements PostService {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());
 
 			if (!image.exists() || !image.isReadable()) {
-				log.debug("Изображение с названием {} не найден", image.getFilename());
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 			}
-
-			log.debug("Изображение с названием {} загружен", image.getFilename());
-
 			return image;
 		} catch (MalformedURLException e) {
-			log.warn("Произошла ошибка при загрузке изображения: {}", e.getMessage(), e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

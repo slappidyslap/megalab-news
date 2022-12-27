@@ -19,7 +19,7 @@ public class RestApiExceptionHandler {
 	/**
 	 PropertyReferenceException выбрасывается,
 	 когда мы Page параметризованный неким типом ({@link org.springframework.data.domain.Page})
-	 сортируем по имени поля, которого не существует в типе
+	 сортируем по имени поля, которого не существует в этом типе
 	 */
 	@ExceptionHandler(PropertyReferenceException.class)
 	void handlePropertyReferenceException(HttpServletResponse response) {
