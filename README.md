@@ -29,3 +29,5 @@ https://stackoverflow.com/questions/5245682/how-to-manage-the-transactionwhich-i
 https://www.freecodecamp.org/news/how-to-implement-cacheable-pagination-of-frequently-changing-content-c8ddc8269e81/
 
 https://stackoverflow.com/questions/59897491/how-can-i-retrieve-sort-property-and-direction-from-a-spring-data-pageable
+
+https://reflectoring.io/bean-validation-with-spring-boot/
