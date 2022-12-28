@@ -18,8 +18,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 // Это бы хорошо протестировать. Потому что это культурно!
 @Component
@@ -28,6 +27,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SimplePostServiceLoggingAspect {
 
+	static String FILE_NOT_VALID_IMAGE_FORMAT = "Изображение не валидного формата";
 	static String POST_BY_ID_NOT_FOUND = "Публикация с id {} не найден";
 	static String POST_BY_TITLE_ALREADY_EXISTS = "Публикация с title \"{}\" уже существует";
 	static String TOTAL_NUMBER_POSTS = "Общее кол-во публикаций: {}";
@@ -128,7 +128,10 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
-		ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e));
+		boolean isBadRequestThrown = ifResponseStatusExceptionWithStatusElseLog(e, BAD_REQUEST,() -> {
+			log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
+		});
+		if (!isBadRequestThrown) ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e));
 	}
 
 

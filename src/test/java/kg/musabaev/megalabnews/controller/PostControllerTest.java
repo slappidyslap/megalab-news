@@ -231,6 +231,21 @@ class PostControllerTest {
 				.andExpect(status().isNotFound());
 	}
 
+	@Test
+	@Order(9)
+	void shouldBeStatus400_whenUploadNotValidFormat() throws Exception {
+		var testFile = new MockMultipartFile(
+				"image",
+				"conditionally_image.json",
+				MediaType.APPLICATION_JSON_VALUE,
+				"{}".getBytes());
+
+		mvc.perform(multipart(apiPrefix + "/images")
+						.file(testFile))
+				.andDo(print())
+				.andExpect(status().isBadRequest());
+	}
+
 	private String getImageUrlFromJson(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
 		String stringifyJson = result.getResponse().getContentAsString();
 		Map<String, Object> map = objectMapper.readValue(stringifyJson, new TypeReference<>() {});

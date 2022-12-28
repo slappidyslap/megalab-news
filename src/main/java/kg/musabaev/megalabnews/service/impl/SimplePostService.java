@@ -22,6 +22,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +33,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 @Log4j2
@@ -44,12 +48,15 @@ public class SimplePostService implements PostService {
 	private final PostRepo postRepo;
 
 	public static final String postItemCacheName = "postItem";
+	public static final Set<String> validImageFormats = Set.of(
+			MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE
+	);
 
 	@Value("${app.storage.folder-name}")
 	private String storageFolderName;
 	@Value("${app.storage.post-image-folder-name}")
 	private String postImageFolderName;
-
 	private Path storage;
 
 	@PostConstruct
@@ -84,7 +91,7 @@ public class SimplePostService implements PostService {
 			post.setTags(postRepo.findTagsByPostId(postId));
 			return post;
 		}).orElseThrow(() -> {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(NOT_FOUND);
 		});
 	}
 
@@ -96,7 +103,7 @@ public class SimplePostService implements PostService {
 			postRepo.deleteById(postId);
 			deleteImageInStorageIfExists(getLastPathSegmentOrNull(post.getImageUrl()));
 		}, () -> {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(NOT_FOUND);
 		});
 	}
 
@@ -117,20 +124,21 @@ public class SimplePostService implements PostService {
 
 			return postDtoPostModelMapper.toPostDto(postRepo.save(post));
 		}).orElseThrow(() -> {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(NOT_FOUND);
 		});
 	}
 
 	@Override
 	public String uploadImage(MultipartFile image) {
-		String originalFilename = image.getOriginalFilename();
-		String uniqueFilename = UUID.randomUUID() + "_" + originalFilename;
+		if (!isValidImageFormat(image))
+			throw new ResponseStatusException(BAD_REQUEST);
+		String uniqueFilename = getUniqueFilename(image);
 		Path pathToSave = storage.resolve(uniqueFilename);
 		String imageUrl = buildUrlForImageByMethodName(PostController.class, "getPostImageByFilename", uniqueFilename);
 		try {
 			image.transferTo(pathToSave);
 		} catch (IOException e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
 		}
 		return imageUrl;
 	}
@@ -143,16 +151,30 @@ public class SimplePostService implements PostService {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());
 
 			if (!image.exists() || !image.isReadable()) {
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+				throw new ResponseStatusException(NOT_FOUND);
 			}
 			return image;
 		} catch (MalformedURLException e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
 		}
 	}
 
+	private String getUniqueFilename(MultipartFile image) {
+		return UUID.randomUUID() + "_" + image.getOriginalFilename();
+	}
 
-//	@CacheEvict("postImage")
+	private boolean isValidImageFormat(MultipartFile image) {
+		String imageFormat;
+		try {
+			imageFormat = Files.probeContentType(Path.of(image.getOriginalFilename()));
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при получение формата изображения", e);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
+		}
+		return validImageFormats.contains(imageFormat);
+	}
+
+	//	@CacheEvict("postImage")
 	private void deleteImageInStorageIfExists(String imageFilename) {
 		if (imageFilename == null) return;
 		try {
@@ -171,10 +193,10 @@ public class SimplePostService implements PostService {
 					controller,
 					methodName,
 					filename
-					).toUriString();
+			).toUriString();
 		} catch (IllegalArgumentException e) {
 			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
 		}
 	}
 
