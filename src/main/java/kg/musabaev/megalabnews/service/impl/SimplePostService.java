@@ -12,6 +12,7 @@ import kg.musabaev.megalabnews.repository.projection.PostWithoutContent;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.aspectj.lang.JoinPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -51,7 +52,6 @@ public class SimplePostService implements PostService {
 
 	private Path storage;
 
-	// Этот метод выполниться после обработки аннотации @Value, что значит не будет null
 	@PostConstruct
 	void setUp() {
 		storage = Path.of(storageFolderName, postImageFolderName);
@@ -100,7 +100,9 @@ public class SimplePostService implements PostService {
 		});
 	}
 
-	// see kg.musabaev.megalabnews.aspect.PostCachingAspect.updateCachePostItem
+	/**
+	 * {@link kg.musabaev.megalabnews.aspect.PostCachingAspect#updateCachePostItem(JoinPoint, NewOrUpdatePostResponse)}
+	 */
 	@Override
 	@Transactional
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
@@ -119,18 +121,6 @@ public class SimplePostService implements PostService {
 		});
 	}
 
-//	@CacheEvict("postImage")
-	private void deleteImageInStorageIfExists(String imageFilename) {
-		if (imageFilename == null) return;
-		try {
-			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
-
-			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
-		} catch (IOException e) {
-			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage(), e);
-		}
-	}
-
 	@Override
 	public String uploadImage(MultipartFile image) {
 		String originalFilename = image.getOriginalFilename();
@@ -143,23 +133,6 @@ public class SimplePostService implements PostService {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return imageUrl;
-	}
-
-	private String buildUrlForImageByMethodName(Class<?> controller, String methodName, String filename) {
-		try {
-			return MvcUriComponentsBuilder.fromMethodName(
-					controller,
-					methodName,
-					filename
-					).toUriString();
-		} catch (IllegalArgumentException e) {
-			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	private String getLastPathSegmentOrNull(String url) {
-		return url != null ? url.substring(url.lastIndexOf("/") + 1) : null;
 	}
 
 	@Override
@@ -176,5 +149,36 @@ public class SimplePostService implements PostService {
 		} catch (MalformedURLException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+
+//	@CacheEvict("postImage")
+	private void deleteImageInStorageIfExists(String imageFilename) {
+		if (imageFilename == null) return;
+		try {
+			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
+
+			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage(), e);
+		}
+	}
+
+
+	private String buildUrlForImageByMethodName(Class<?> controller, String methodName, String filename) {
+		try {
+			return MvcUriComponentsBuilder.fromMethodName(
+					controller,
+					methodName,
+					filename
+					).toUriString();
+		} catch (IllegalArgumentException e) {
+			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private String getLastPathSegmentOrNull(String url) {
+		return url != null ? url.substring(url.lastIndexOf("/") + 1) : null;
 	}
 }

@@ -24,6 +24,7 @@ public class PostCachingAspect {
 	private final CacheManager cacheManager;
 	private final PostDtoPostModelMapper mapper;
 
+	// Кастомный @CachePut
 	@AfterReturning(
 			pointcut = "execution(" +
 					"public * kg.musabaev.megalabnews.service.impl.SimplePostService.update(..))",

@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.musabaev.megalabnews.Application;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Map;
@@ -28,6 +31,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -43,7 +47,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class PostControllerTest {
 
-	final String apiPrefix = "/api/v1/posts";
 	@Autowired
 	MockMvc mvc;
 	@Autowired
@@ -51,8 +54,9 @@ class PostControllerTest {
 	@Autowired
 	PostRepo repo;
 
-	static String rootFolderName = "test-storage";
-	static String postImageFolderName = "post-image";
+	final String apiPrefix = "/api/v1/posts";
+	final static String rootFolderName = "test-storage";
+	final static String postImageFolderName = "post-image";
 	static Path storage;
 
 	@BeforeAll
@@ -180,18 +184,17 @@ class PostControllerTest {
 				.andExpect(jsonPath("$.tags", hasItems("java", "persistence")))
 				.andReturn();
 
-		String stringifyJson = result.getResponse().getContentAsString();
-		Map<String, Object> map = objectMapper.readValue(stringifyJson, new TypeReference<>() {});
-		String imageUrl = (String) map.get("imageUrl");
+		String imageUrl = getImageUrlFromJson(result);
+		assertThat(imageUrl, is(notNullValue()));
 
-		mvc.perform(get(apiPrefix + "/images/" + imageUrl.substring(imageUrl.lastIndexOf("/") + 1))) // Получаем last сегмент url`а
+		mvc.perform(request(HttpMethod.GET, imageUrl))
 				.andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk());
 	}
 
 
 	@Test
-	@Order(5)
+	@Order(6)
 	void shouldBeStatus404_whenPostById4NotExists() throws Exception {
 		mvc.perform(get(apiPrefix + "/4")
 						.contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -200,7 +203,7 @@ class PostControllerTest {
 	}
 
 	@Test
-	@Order(6)
+	@Order(7)
 	void shouldBeStatus404_whenDeletingPostById4() throws Exception {
 		mvc.perform(delete(apiPrefix + "/4"))
 				.andDo(print())
@@ -209,12 +212,28 @@ class PostControllerTest {
 	}
 
 	@Test
-	@Order(7)
+	@Order(8)
 	void shouldBeStatus200_whenDeletingPostById3() throws Exception {
+		MvcResult result = mvc.perform(get(apiPrefix + "/3")
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
+				.andReturn();
+		String imageUrl = getImageUrlFromJson(result);
+		assertThat(imageUrl, is(notNullValue()));
+
 		mvc.perform(delete(apiPrefix + "/3"))
 				.andDo(print())
 				.andExpect(status().isOk());
 		assertThat(repo.existsById(3L), is(false));
 		assertThat(repo.findAll(), hasSize(2)); // фетчится без тега если что
+
+
+		mvc.perform(request(HttpMethod.GET, imageUrl))
+				.andExpect(status().isNotFound());
+	}
+
+	private String getImageUrlFromJson(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
+		String stringifyJson = result.getResponse().getContentAsString();
+		Map<String, Object> map = objectMapper.readValue(stringifyJson, new TypeReference<>() {});
+		return  (String) map.get("imageUrl");
 	}
 }

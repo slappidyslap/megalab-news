@@ -4,6 +4,8 @@ import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.model.Post;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -16,13 +18,28 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 // Это бы хорошо протестировать. Потому что это культурно!
 @Component
 @Aspect
 @Log4j2
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SimplePostServiceLoggingAspect {
+
+	static String POST_BY_ID_NOT_FOUND = "Публикация с id {} не найден";
+	static String POST_BY_TITLE_ALREADY_EXISTS = "Публикация с title \"{}\" уже существует";
+	static String TOTAL_NUMBER_POSTS = "Общее кол-во публикаций: {}";
+	static String POST_BY_ID_FOUND = "Найдена публикация с id: {}";
+	static String POST_BY_ID_DELETED = "Публикации с id {} удален";
+	static String POST_BY_ID_UPDATED = "Публикация с id {} обновлен";
+	static String NEW_IMAGE_SAVED_WITH_URL = "Новая изображение публикации сохранен по след. url: {}";
+	static String ERROR_OCCURRED_WHILE_SAVING_IMAGE = "Произошла ошибка при сохранении изображения:";
+	static String IMAGE_WITH_FILENAME_RECEIVED = "Изображение с названием {} получен";
+	static String IMAGE_BY_FILENAME_NOT_FOUND = "Изображение с названием {} не найден";
+	static String ERROR_OCCURRED_WHILE_RECEIVING_IMAGE = "Произошла ошибка при получении изображения:";
+	static String ANOTHER_EXCEPTION_THROWN = "Произошло другое исключение:";
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
 	void targetPackage() {}
@@ -40,7 +57,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e")
 	void afterReturningMethodaSave(JoinPoint jp, Exception e) {
 		ifResponseStatusExceptionWithStatusElseLog(e, HttpStatus.CONFLICT, () -> {
-			log.debug("Публикация с title \"{}\" уже существует", ((NewOrUpdatePostRequest) jp.getArgs()[0]).title());
+			log.debug(POST_BY_TITLE_ALREADY_EXISTS, ((NewOrUpdatePostRequest) jp.getArgs()[0]).title());
 		});
 	}
 
@@ -49,7 +66,7 @@ public class SimplePostServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* getAll(..)))",
 			returning = "r")
 	void afterReturningMethodGetAll(PostPageResponse r) {
-		log.debug("Общее кол-во публикаций: {}", r.page().getTotalElements());
+		log.debug(TOTAL_NUMBER_POSTS, r.page().getTotalElements());
 	}
 
 
@@ -57,7 +74,7 @@ public class SimplePostServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* getById(..)))",
 			returning = "r")
 	void afterReturningMethodGetById(Post r) {
-		log.debug("Найдена публикация с id: {}", r.getId());
+		log.debug(POST_BY_ID_FOUND, r.getId());
 	}
 
 	@AfterThrowing(
@@ -65,14 +82,14 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodGetById(JoinPoint jp, Exception e) {
-		ifNotFound(jp, e, "Публикация с id {} не найден");
+		ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* deleteById(..)))")
 	void afterReturningMethodDeleteById(JoinPoint jp) {
-		log.debug("Публикации с id {} удален", jp.getArgs()[0]);
+		log.debug(POST_BY_ID_DELETED, jp.getArgs()[0]);
 	}
 
 	@AfterThrowing(
@@ -80,14 +97,14 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodDeleteById(JoinPoint jp, Exception e) {
-		ifNotFound(jp, e, "Публикация с id {} не найден");
+		ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* update(..)))")
 	void afterReturningMethodUpdate(JoinPoint jp) {
-		log.debug("Публикация с id {} обновлен", jp.getArgs()[0]);
+		log.debug(POST_BY_ID_UPDATED, jp.getArgs()[0]);
 	}
 
 	@AfterThrowing(
@@ -95,7 +112,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUpdate(JoinPoint jp, Exception e) {
-		ifNotFound(jp, e, "Публикация с id {} не найден");
+		ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
@@ -103,7 +120,7 @@ public class SimplePostServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* uploadImage(..)))",
 			returning = "r")
 	void afterReturningMethodUploadImage(String r) {
-		log.debug("Новая изображение публикации сохранен по след. url: {}", r);
+		log.debug(NEW_IMAGE_SAVED_WITH_URL, r);
 	}
 
 	@AfterThrowing(
@@ -111,7 +128,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
-		ifInternalServerError(e, "Произошла ошибка при сохранении изображения");
+		ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e));
 	}
 
 
@@ -119,7 +136,7 @@ public class SimplePostServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* getImageByFilename(..)))",
 			returning = "r")
 	void afterReturningMethodGetImageByFilename(Resource r) {
-		log.debug("Изображение с названием {} получен", r.getFilename());
+		log.debug(IMAGE_WITH_FILENAME_RECEIVED, r.getFilename());
 	}
 
 	@AfterThrowing(
@@ -127,23 +144,26 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodGetImageByFilename(JoinPoint jp, Exception e) {
-		ifInternalServerError(e, "Произошла ошибка при получении изображения");
-		ifNotFound(jp, e, "Изображение с названием {} не найден");
+		boolean isNotFoundThrown = ifNotFound(e, () -> log.debug(IMAGE_BY_FILENAME_NOT_FOUND, jp.getArgs()[0]));
+		if (!isNotFoundThrown) ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_RECEIVING_IMAGE, e));
 	}
 
 	// частный случай декоратора
-	private void ifInternalServerError(Exception e, String str) {
-		ifResponseStatusExceptionWithStatusElseLog(e, NOT_FOUND, () -> log.debug(str));
+	private boolean ifInternalServerError(Exception e, Runnable runnable) {
+		return ifResponseStatusExceptionWithStatusElseLog(e, INTERNAL_SERVER_ERROR, runnable);
 	}
 
-	private void ifNotFound(JoinPoint jp, Exception e, String str) {
-		ifResponseStatusExceptionWithStatusElseLog(e, NOT_FOUND, () -> log.debug(str, jp.getArgs()[0]));
+	private boolean ifNotFound(Exception e, Runnable runnable) {
+		return ifResponseStatusExceptionWithStatusElseLog(e, NOT_FOUND, runnable);
 	}
 
-	private void ifResponseStatusExceptionWithStatusElseLog(Exception e, HttpStatus status, Runnable runnable) {
+	private boolean ifResponseStatusExceptionWithStatusElseLog(Exception e, HttpStatus status, Runnable runnable) {
 		if (e.getClass() == ResponseStatusException.class &&
-				((ResponseStatusException) e).getStatusCode() == HttpStatusCode.valueOf(status.value()))
+				((ResponseStatusException) e).getStatusCode() == HttpStatusCode.valueOf(status.value())) {
 			runnable.run();
-		else log.warn("Произошло другое исключение:", e);
+			return true;
+		}
+		log.warn(ANOTHER_EXCEPTION_THROWN, e);
+		return false;
 	}
 }
