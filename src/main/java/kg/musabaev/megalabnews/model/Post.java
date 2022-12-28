@@ -21,7 +21,7 @@ import java.util.Set;
 @Setter
 @ToString(exclude = {"tags"})
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"title", "createdDate"})
+@EqualsAndHashCode(of = {"title"})
 public class Post {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,7 @@
-package kg.musabaev.megalabnews;
+package kg.musabaev.megalabnews.model;
 
-import kg.musabaev.megalabnews.model.Post;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 @DataJpaTest
 @ActiveProfiles("test")
 @Log4j2
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PostEntityTest {
 
 	@Autowired
@@ -39,7 +41,7 @@ public class PostEntityTest {
 
 		Post transientPost = new Post();
 		transientPost.setTitle("title");
-		transientPost.setCreatedDate(LocalDate.now());
+		transientPost.setContent("content");
 
 		posts.add(transientPost);
 
