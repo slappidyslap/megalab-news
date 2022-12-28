@@ -138,7 +138,7 @@ public class SimplePostService implements PostService {
 		try {
 			image.transferTo(pathToSave);
 		} catch (IOException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
 		}
 		return imageUrl;
 	}
@@ -155,7 +155,7 @@ public class SimplePostService implements PostService {
 			}
 			return image;
 		} catch (MalformedURLException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
 		}
 	}
 
@@ -169,7 +169,7 @@ public class SimplePostService implements PostService {
 			imageFormat = Files.probeContentType(Path.of(image.getOriginalFilename()));
 		} catch (IOException e) {
 			log.warn("Произошла ошибка при получение формата изображения", e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
 		}
 		return validImageFormats.contains(imageFormat);
 	}
@@ -182,7 +182,7 @@ public class SimplePostService implements PostService {
 
 			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
 		} catch (IOException e) {
-			log.warn("Произошла ошибка при удалении изображения: {}", e.getMessage(), e);
+			log.warn("Произошла ошибка при удалении изображения", e);
 		}
 	}
 
@@ -196,7 +196,7 @@ public class SimplePostService implements PostService {
 			).toUriString();
 		} catch (IllegalArgumentException e) {
 			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
 		}
 	}
 
