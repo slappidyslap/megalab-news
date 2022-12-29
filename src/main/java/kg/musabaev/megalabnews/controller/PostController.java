@@ -33,7 +33,7 @@ public class PostController {
 	}
 
 	@GetMapping
-	ResponseEntity<PostPageResponse> getAllPosts(@PageableDefault(5) Pageable pageable) {
+	ResponseEntity<PostPageResponse> getAllPosts(@PageableDefault Pageable pageable) {
 		return ResponseEntity.ok(postService.getAll(pageable));
 	}
 
