@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,12 @@ public class PostCachingAspect {
 	private final CacheManager cacheManager;
 	private final PostDtoPostModelMapper mapper;
 
+	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
+	void targetPackage() {};
+
 	// Кастомный @CachePut
 	@AfterReturning(
-			pointcut = "execution(" +
-					"public * kg.musabaev.megalabnews.service.impl.SimplePostService.update(..))",
+			pointcut = "targetPackage() && execution(* update(..))",
 			returning = "responseDto")
 	void updateCachePostItem(JoinPoint joinPoint, NewOrUpdatePostResponse responseDto) {
 		Long postId = (Long) joinPoint.getArgs()[0];
@@ -42,6 +45,20 @@ public class PostCachingAspect {
 
 		cachePostItem.put(postId, cachedPost);
 
-		log.debug("Обновлены данные у кеша {} с ключом {}", cacheName, postId);
+		log.debug("Обновлены данные у кэша {} с ключом {}", cacheName, postId);
+	}
+
+	@AfterReturning(
+			pointcut = "targetPackage() && execution(* save(..))",
+			returning = "newPostDto")
+	void  deleteCacheItemByPostIdAfterSaving(NewOrUpdatePostResponse newPostDto) {
+		Long postId = newPostDto.id();
+		String cacheName = SimplePostService.postItemCacheName;
+
+		Cache cachePostItem = cacheManager.getCache(cacheName);
+		if (Objects.isNull(cachePostItem)) return;
+		cachePostItem.evict(postId);
+
+		log.debug("Удалены данные у кэша {} с ключом {}", cacheName, postId);
 	}
 }
