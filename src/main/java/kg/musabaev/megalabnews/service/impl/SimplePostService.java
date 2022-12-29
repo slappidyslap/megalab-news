@@ -5,7 +5,7 @@ import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.PostPageResponse;
-import kg.musabaev.megalabnews.mapper.PostDtoPostModelMapper;
+import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.projection.PostWithoutContent;
@@ -44,7 +44,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class SimplePostService implements PostService {
 
-	private final PostDtoPostModelMapper postDtoPostModelMapper;
+	private final PostMapper postMapper;
 	private final PostRepo postRepo;
 
 	public static final String postItemCacheName = "postItem";
@@ -70,9 +70,9 @@ public class SimplePostService implements PostService {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
-		Post newPost = postDtoPostModelMapper.toPostModel(newOrUpdatePostRequest);
+		Post newPost = postMapper.toPostModel(newOrUpdatePostRequest);
 
-		return postDtoPostModelMapper.toPostDto(postRepo.save(newPost));
+		return postMapper.toPostDto(postRepo.save(newPost));
 	}
 
 	@Override
@@ -117,12 +117,12 @@ public class SimplePostService implements PostService {
 			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
 			String postImageFilename = getLastPathSegmentOrNull(post.getImageUrl());
 
-			postDtoPostModelMapper.updatePostModelByPostDto(dto, post);
+			postMapper.updatePostModelByPostDto(dto, post);
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
 			if (postImageFilename != null && !imageFilename.equals(postImageFilename))
 				deleteImageInStorageIfExists(postImageFilename);
 
-			return postDtoPostModelMapper.toPostDto(postRepo.save(post));
+			return postMapper.toPostDto(postRepo.save(post));
 		}).orElseThrow(() -> {
 			throw new ResponseStatusException(NOT_FOUND);
 		});

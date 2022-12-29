@@ -1,7 +1,7 @@
 package kg.musabaev.megalabnews.aspect;
 
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.mapper.PostDtoPostModelMapper;
+import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.service.impl.SimplePostService;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +23,10 @@ import java.util.Objects;
 public class PostCachingAspect {
 
 	private final CacheManager cacheManager;
-	private final PostDtoPostModelMapper mapper;
+	private final PostMapper mapper;
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
-	void targetPackage() {};
+	void targetPackage() {}
 
 	// Кастомный @CachePut
 	@AfterReturning(

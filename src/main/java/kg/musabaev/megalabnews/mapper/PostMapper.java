@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface PostDtoPostModelMapper {
+public interface PostMapper {
 
 	Post toPostModel(NewOrUpdatePostRequest newOrUpdatePostRequest);
 
