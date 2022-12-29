@@ -1,3 +1,34 @@
+## А что делать?
+
+Все команды выполняются из bash
+
+Если русские символы не отображаются: 
+```bash
+chcp.com 1251
+```
+
+Включить кэширование: 
+```bash
+export CACHE_ENABLED=true
+```
+
+Запустить через maven: 
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Как тестовые данные был использован следующий 
+[dataset](https://www.kaggle.com/datasets/kaggle/kaggle-blog-winners-posts)
+
+Выполнить следующий скрипт для импорта
+
+```h2
+INSERT INTO posts (title, content, created_date, description)
+SELECT title, content, 
+       FORMATDATETIME(publication_date, 'yyyy-MM-dd')::DATE AS created_date, 'lorem'
+FROM CSVREAD('<dump.csv>')
+LIMIT 30;
+```
 ## Полезные ссылки
 
 https://stackoverflow.com/questions/62045161/how-to-use-clob-with-hibernate-and-both-postgres-and-h2
