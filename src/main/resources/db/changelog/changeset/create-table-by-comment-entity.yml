@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-by-comment-entity
+      author: Eldiyar
+      changes:
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: comment_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: comments_comment_id_pk
+              - column:
+                  name: post_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: comments_post_id__posts_post_id_fk
+                    referencedTableName: posts
+                    referencedColumnNames: post_id
+              - column:
+                  name: parent_comment_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: comments_parent_comment_id__comments_comment_id_fk
+                    referencedTableName: comments
+                    referencedColumnNames: comment_id
+              - column:
+                  name: commentator
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: date
+                  constraints:
+                    nullable: false

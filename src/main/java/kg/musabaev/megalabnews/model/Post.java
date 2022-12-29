@@ -17,12 +17,12 @@ import java.util.Set;
 @Table(name = "posts", indexes = {
 		@Index(name = "posts_title_idx", columnList = "title", unique = true)
 })
+@EntityListeners(AuditingEntityListener.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @ToString(exclude = {"tags"})
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(of = {"title"})
 public class Post {
 	@Id

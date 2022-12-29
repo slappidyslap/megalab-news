@@ -8,3 +8,6 @@ databaseChangeLog:
   - include:
       file: changeset/rename-image-filename-to-image-url-in-post-table.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/create-table-by-comment-entity.yml
+      relativeToChangelogFile: true
