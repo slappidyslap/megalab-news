@@ -3,9 +3,10 @@ package kg.musabaev.megalabnews.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.Set;
 @Setter
 @ToString(exclude = {"tags"})
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(of = {"title"})
 public class Post {
 	@Id
@@ -34,7 +36,7 @@ public class Post {
 	@Column(nullable = false, length = 500)
 	String description = "";
 
-	@CreationTimestamp
+	@CreatedDate
 	@Column(updatable = false)
 	LocalDate createdDate;
 
