@@ -36,6 +36,10 @@ management:
       exposure:
         include: "*"
 
+springdoc:
+  api-docs:
+    path: /api-docs
+
 app:
   cache-enabled: ${CACHE_ENABLED:false}
   storage:

@@ -64,3 +64,5 @@ https://stackoverflow.com/questions/59897491/how-can-i-retrieve-sort-property-an
 https://reflectoring.io/bean-validation-with-spring-boot/
 
 https://sysout.ru/vvedenie-v-aop-v-spring-boot/
+
+https://springdoc.org/v2/#getting-started
