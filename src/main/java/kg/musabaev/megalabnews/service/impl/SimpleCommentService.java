@@ -8,10 +8,14 @@ import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
+import kg.musabaev.megalabnews.repository.projection.NonRootCommentListView;
+import kg.musabaev.megalabnews.repository.projection.RootCommentListView;
 import kg.musabaev.megalabnews.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,6 +55,26 @@ public class SimpleCommentService implements CommentService {
 		newComment.setContent(dto.content());
 
 		return commentMapper.toDto(commentRepo.save(newComment));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<RootCommentListView> getRootsByPostId(Long postId, Pageable pageable) {
+		boolean isPostExistsById = postRepo.existsById(postId);
+		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
+
+		return commentRepo.findRootsByPostIdAndParentIsNull(postId, pageable);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<NonRootCommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
+		boolean isPostExistsById = postRepo.existsById(postId);
+		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
+		boolean isCommentExists = commentRepo.existsByIdAndPostId(parentCommentId, postId);
+		if (!isCommentExists) throw new ResponseStatusException(NOT_FOUND, "comment not found");
+
+		return commentRepo.findChildrenByParentIdAndPostId(parentCommentId, postId, pageable);
 	}
 
 	@Override

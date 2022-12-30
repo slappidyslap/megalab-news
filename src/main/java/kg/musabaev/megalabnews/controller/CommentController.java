@@ -4,8 +4,13 @@ import jakarta.validation.Valid;
 import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import kg.musabaev.megalabnews.dto.UpdateCommentRequest;
+import kg.musabaev.megalabnews.repository.projection.NonRootCommentListView;
+import kg.musabaev.megalabnews.repository.projection.RootCommentListView;
 import kg.musabaev.megalabnews.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +27,21 @@ public class CommentController {
 			@PathVariable Long postId,
 			@Valid @RequestBody NewCommentRequest dto) {
 		return ResponseEntity.ok(commentService.save(postId, dto));
+	}
+
+	@GetMapping("/{postId}/comments")
+	ResponseEntity<Page<RootCommentListView>> getRootCommentsOfPostById(
+			@PathVariable Long postId,
+			@PageableDefault Pageable pageable) {
+		return ResponseEntity.ok(commentService.getRootsByPostId(postId, pageable));
+	}
+
+	@GetMapping("/{postId}/comments/{parentCommentId}")
+	ResponseEntity<Page<NonRootCommentListView>> getCommentChildrenOfParentId(
+			@PathVariable Long postId,
+			@PathVariable Long parentCommentId,
+			@PageableDefault Pageable pageable) {
+		return ResponseEntity.ok(commentService.getChildrenByParentId(postId, parentCommentId, pageable));
 	}
 
 	@PutMapping("/{postId}/comments/{commentId}")
