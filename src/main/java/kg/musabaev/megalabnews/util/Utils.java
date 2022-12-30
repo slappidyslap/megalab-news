@@ -40,22 +40,22 @@ public class Utils {
 		commentRepo = _commentRepo;
 	}
 
-	public static Post getPostReferenceByIdElseThrow(Long postId) {
+	public static Post getPostReferenceByIdOrElseThrow(Long postId) {
 		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
 		return postRepo.getReferenceById(postId);
 	}
 
-	public static void assertPostExistsByIdElseThrow(Long postId) {
+	public static void assertPostExistsByIdOrElseThrow(Long postId) {
 		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
 	}
 
-	public static Comment getCommentReferenceByIdElseThrow(Long postId, Long commentId) {
+	public static Comment getCommentReferenceByIdOrElseThrow(Long postId, Long commentId) {
 		if (!commentRepo.existsByIdAndPostId(commentId, postId))
 			throw new CommentNotFoundException();
 		return commentRepo.getReferenceById(commentId);
 	}
 
-	public static void assertCommentExistsByIdElseThrow(Long postId, Long commentId) {
+	public static void assertCommentExistsByIdOrElseThrow(Long postId, Long commentId) {
 		if (!commentRepo.existsByIdAndPostId(commentId, postId))
 			throw new CommentNotFoundException();
 	}
@@ -66,7 +66,7 @@ public class Utils {
 	 * (какое-то ожидаемое исключение было сгенерировано),
 	 * иначе в логи напишет, что произошло другое исключение
 	 * @param actualException действительное исключение
-	 * @param checks список проверок произошло ли исключение или нет
+	 * @param checks список результатов проверок, в котором произошло ли исключение или нет
 	 */
 	public static void iterateChainOfChecks(
 			Exception actualException,
@@ -80,23 +80,22 @@ public class Utils {
 	}
 
 	public static boolean ifCommentNotFound(Exception e, Runnable runnable) {
-		return ifExceptionEqualsElseLog(e, CommentNotFoundException.class, runnable);
+		return ifExceptionEqualsOrElseLog(e, CommentNotFoundException.class, runnable);
 	}
 
 	public static boolean ifPostNotFound(Exception e, Runnable runnable) {
-		return ifExceptionEqualsElseLog(e, PostNotFoundException.class, runnable);
+		return ifExceptionEqualsOrElseLog(e, PostNotFoundException.class, runnable);
 	}
 
 	public static boolean ifInternalServerError(Exception e, Runnable runnable) {
-		return ifResponseStatusExceptionWithStatusElseLog(e, INTERNAL_SERVER_ERROR, runnable);
+		return ifResponseStatusExceptionWithStatusOrElseLog(e, INTERNAL_SERVER_ERROR, runnable);
 	}
 
-	@Deprecated
 	public static boolean ifNotFound(Exception e, Runnable runnable) {
-		return ifResponseStatusExceptionWithStatusElseLog(e, NOT_FOUND, runnable);
+		return ifResponseStatusExceptionWithStatusOrElseLog(e, NOT_FOUND, runnable);
 	}
 
-	public static boolean ifExceptionEqualsElseLog(
+	public static boolean ifExceptionEqualsOrElseLog(
 			Exception throwing,
 			Class<? extends Exception> exceptedException,
 			Runnable runnable) {
@@ -107,7 +106,7 @@ public class Utils {
 		return false;
 	}
 
-	public static boolean ifResponseStatusExceptionWithStatusElseLog(Exception e, HttpStatus status, Runnable runnable) {
+	public static boolean ifResponseStatusExceptionWithStatusOrElseLog(Exception e, HttpStatus status, Runnable runnable) {
 		if (e.getClass() == ResponseStatusException.class &&
 				((ResponseStatusException) e).getStatusCode() == HttpStatusCode.valueOf(status.value())) {
 			runnable.run();

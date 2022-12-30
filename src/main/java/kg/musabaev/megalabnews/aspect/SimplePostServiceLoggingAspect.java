@@ -27,6 +27,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SimplePostServiceLoggingAspect {
 
+	static String NEW_POST_SAVED = "Новая публикация: {}";
 	static String FILE_NOT_VALID_IMAGE_FORMAT = "Изображение не валидного формата";
 	static String POST_BY_ID_NOT_FOUND = "Публикация с id {} не найден";
 	static String POST_BY_TITLE_ALREADY_EXISTS = "Публикация с title \"{}\" уже существует";
@@ -48,14 +49,14 @@ public class SimplePostServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* save(..)))",
 			returning = "r")
 	void afterReturningMethodSave(NewOrUpdatePostResponse r) {
-		log.debug("Новая публикация: {}", r);
+		log.debug(NEW_POST_SAVED, r);
 	}
 
 	@AfterThrowing(
 			pointcut = "targetPackage() && execution(* save(..)))",
 			throwing = "e")
 	void afterReturningMethodSave(JoinPoint jp, Exception e) {
-		Utils.ifResponseStatusExceptionWithStatusElseLog(e, HttpStatus.CONFLICT, () -> {
+		Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, HttpStatus.CONFLICT, () -> {
 			log.debug(POST_BY_TITLE_ALREADY_EXISTS, ((NewOrUpdatePostRequest) jp.getArgs()[0]).title());
 		});
 	}
@@ -81,7 +82,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodGetById(JoinPoint jp, Exception e) {
-		Utils.ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
+		Utils.ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
@@ -127,7 +128,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
-		boolean isBadRequestThrown = Utils.ifResponseStatusExceptionWithStatusElseLog(e, BAD_REQUEST,() -> {
+		boolean isBadRequestThrown = Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST,() -> {
 			log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
 		});
 		if (!isBadRequestThrown) Utils.ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e));

@@ -31,9 +31,9 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse save(Long postId, NewCommentRequest dto) {
-		Post post = Utils.getPostReferenceByIdElseThrow(postId);
+		Post post = Utils.getPostReferenceByIdOrElseThrow(postId);
 		Comment parentComment = dto.parentId() != null
-				? Utils.getCommentReferenceByIdElseThrow(postId, dto.parentId())
+				? Utils.getCommentReferenceByIdOrElseThrow(postId, dto.parentId())
 				: null;
 
 		Comment newComment = commentMapper.toModel(dto);
@@ -47,7 +47,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
-		Utils.assertPostExistsByIdElseThrow(postId);
+		Utils.assertPostExistsByIdOrElseThrow(postId);
 
 		return commentRepo.findRootsByPostIdAndParentIsNull(postId, pageable);
 	}
@@ -55,8 +55,8 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
-		Utils.assertPostExistsByIdElseThrow(postId);
-		Utils.assertCommentExistsByIdElseThrow(postId, parentCommentId);
+		Utils.assertPostExistsByIdOrElseThrow(postId);
+		Utils.assertCommentExistsByIdOrElseThrow(postId, parentCommentId);
 
 		return commentRepo.findChildrenByParentIdAndPostId(parentCommentId, postId, pageable);
 	}
@@ -64,7 +64,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse update(Long postId, Long commentId, UpdateCommentRequest dto) {
-		Utils.assertPostExistsByIdElseThrow(postId);
+		Utils.assertPostExistsByIdOrElseThrow(postId);
 
 		Comment updatedComment = commentRepo.findByIdAndPostId(commentId, postId).map(comment -> {
 			comment.setContent(dto.content());
@@ -77,7 +77,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public void deleteById(Long postId, Long commentId) {
-		Utils.assertCommentExistsByIdElseThrow(postId, commentId);
+		Utils.assertCommentExistsByIdOrElseThrow(postId, commentId);
 		commentRepo.deleteById(commentId);
 	}
 }

@@ -3,7 +3,6 @@ package kg.musabaev.megalabnews.aspect;
 import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import kg.musabaev.megalabnews.repository.projection.CommentListView;
-import kg.musabaev.megalabnews.util.Utils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
@@ -17,8 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static kg.musabaev.megalabnews.util.Utils.ifCommentNotFound;
-import static kg.musabaev.megalabnews.util.Utils.ifPostNotFound;
+import static kg.musabaev.megalabnews.util.Utils.*;
 
 @Component
 @Aspect
@@ -48,7 +46,7 @@ public class SimpleCommentServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* save(..)))",
 			throwing = "e")
 	void afterThrowingMethodSave(JoinPoint jp, Exception e) {
-		Utils.iterateChainOfChecks(e, List.of(
+		iterateChainOfChecks(e, List.of(
 				ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0])),
 				ifCommentNotFound(e, () -> {
 					log.debug(COMMENT_BY_ID_NOT_FOUND, ((NewCommentRequest) jp.getArgs()[1]).parentId());
@@ -82,7 +80,7 @@ public class SimpleCommentServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* getChildrenByParentId(..)))",
 			throwing = "e")
 	void afterThrowingMethodGetChildrenByParentId(JoinPoint jp, Exception e) {
-		Utils.iterateChainOfChecks(e, List.of(
+		iterateChainOfChecks(e, List.of(
 				ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0])),
 				ifCommentNotFound(e, () -> log.debug(COMMENT_BY_ID_NOT_FOUND, jp.getArgs()[1])))
 		);
@@ -99,7 +97,7 @@ public class SimpleCommentServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* update(..)))",
 			throwing = "e")
 	void afterThrowingMethodUpdate(JoinPoint jp, Exception e) {
-		Utils.iterateChainOfChecks(e, List.of(
+		iterateChainOfChecks(e, List.of(
 				ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0])),
 				ifCommentNotFound(e, () -> log.debug(COMMENT_BY_ID_NOT_FOUND, jp.getArgs()[1])))
 		);
@@ -110,7 +108,7 @@ public class SimpleCommentServiceLoggingAspect {
 			pointcut = "targetPackage() && execution(* deleteById(..)))",
 			throwing = "e")
 	void afterThrowingMethodDeleteById(JoinPoint jp, Exception e) {
-		ifCommentNotFound(e, () -> log.debug("Комментарий с id {} не найден", jp.getArgs()[1]));
+		ifCommentNotFound(e, () -> log.debug(COMMENT_BY_ID_NOT_FOUND, jp.getArgs()[1]));
 	}
 
 	@AfterReturning(
