@@ -4,11 +4,13 @@ import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
+import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
+import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.JoinPoint;
@@ -88,7 +90,7 @@ public class SimplePostService implements PostService {
 			post.setTags(postRepo.findTagsByPostId(postId));
 			return post;
 		}).orElseThrow(() -> {
-			throw new ResponseStatusException(NOT_FOUND);
+			throw new PostNotFoundException();
 		});
 	}
 
@@ -96,8 +98,7 @@ public class SimplePostService implements PostService {
 	@Transactional
 	@CacheEvict(postItemCacheName)
 	public void deleteById(Long postId) {
-		boolean isPostExists = postRepo.existsById(postId);
-		if (!isPostExists) throw new ResponseStatusException(NOT_FOUND);
+		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
 				getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
 		postRepo.deleteById(postId);
@@ -121,7 +122,7 @@ public class SimplePostService implements PostService {
 
 			return postMapper.toPostDto(postRepo.save(post));
 		}).orElseThrow(() -> {
-			throw new ResponseStatusException(NOT_FOUND);
+			throw new PostNotFoundException();
 		});
 	}
 

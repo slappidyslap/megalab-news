@@ -18,6 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static kg.musabaev.megalabnews.util.Utils.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 // Это бы хорошо протестировать. Потому что это культурно!
@@ -97,7 +100,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodDeleteById(JoinPoint jp, Exception e) {
-		Utils.ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
+		Utils.ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
@@ -112,7 +115,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUpdate(JoinPoint jp, Exception e) {
-		Utils.ifNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
+		Utils.ifPostNotFound(e, () -> log.debug(POST_BY_ID_NOT_FOUND, jp.getArgs()[0]));
 	}
 
 
@@ -128,10 +131,12 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
-		boolean isBadRequestThrown = Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST,() -> {
-			log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
-		});
-		if (!isBadRequestThrown) Utils.ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e));
+		iterateChainOfChecks(e, List.of(
+				Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST,() -> {
+					log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
+				}),
+				ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e))
+		));
 	}
 
 
@@ -147,7 +152,9 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodGetImageByFilename(JoinPoint jp, Exception e) {
-		boolean isNotFoundThrown = Utils.ifNotFound(e, () -> log.debug(IMAGE_BY_FILENAME_NOT_FOUND, jp.getArgs()[0]));
-		if (!isNotFoundThrown) Utils.ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_RECEIVING_IMAGE, e));
+		iterateChainOfChecks(e,List.of(
+				ifNotFound(e, () -> log.debug(IMAGE_BY_FILENAME_NOT_FOUND, jp.getArgs()[0])),
+				ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_RECEIVING_IMAGE, e))
+		));
 	}
 }
