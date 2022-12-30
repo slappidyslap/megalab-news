@@ -19,4 +19,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 
 	@Query(value = "SELECT tag FROM posts_tags WHERE post_id = :postId", nativeQuery = true)
 	Set<String> findTagsByPostId(@Param("postId") Long postId);
+
+	@Query("SELECT p.imageUrl FROM Post p WHERE p.id = :postId")
+	String getPostImageUrlByPostId(@Param("postId") Long postId);
 }

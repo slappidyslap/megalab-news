@@ -99,12 +99,12 @@ public class SimplePostService implements PostService {
 	@Transactional
 	@CacheEvict(postItemCacheName)
 	public void deleteById(Long postId) {
-		postRepo.findById(postId).ifPresentOrElse(post -> {
-			postRepo.deleteById(postId);
-			deleteImageInStorageIfExists(getLastPathSegmentOrNull(post.getImageUrl()));
-		}, () -> {
-			throw new ResponseStatusException(NOT_FOUND);
-		});
+		boolean isPostExists = postRepo.existsById(postId);
+		if (!isPostExists) throw new ResponseStatusException(NOT_FOUND);
+		deleteImageInStorageIfExists(
+				getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
+		postRepo.deleteById(postId);
+
 	}
 
 	/**

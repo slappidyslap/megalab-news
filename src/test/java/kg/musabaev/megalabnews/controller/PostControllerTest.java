@@ -213,7 +213,7 @@ class PostControllerTest {
 
 	@Test
 	@Order(8)
-	void shouldBeStatus200_whenDeletingPostById3() throws Exception {
+	void shouldBeStatus200AndShouldCascadeDeleteImage_whenDeletingPostById3() throws Exception {
 		MvcResult result = mvc.perform(get(apiPrefix + "/3")
 				.contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andReturn();
