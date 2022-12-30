@@ -3,11 +3,12 @@ package kg.musabaev.megalabnews.controller;
 import jakarta.validation.Valid;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +34,7 @@ public class PostController {
 	}
 
 	@GetMapping
-	ResponseEntity<PostPageResponse> getAllPosts(@PageableDefault Pageable pageable) {
+	ResponseEntity<Page<PostListView>> getAllPosts(@PageableDefault Pageable pageable) {
 		return ResponseEntity.ok(postService.getAll(pageable));
 	}
 

@@ -4,11 +4,10 @@ import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.PostRepo;
-import kg.musabaev.megalabnews.repository.projection.PostWithoutContent;
+import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -77,10 +76,8 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public PostPageResponse getAll(Pageable pageable) {
-		Page<PostWithoutContent> postPage = postRepo.findAllProjectedBy(PostWithoutContent.class, pageable);
-
-		return new PostPageResponse(postPage);
+	public Page<PostListView> getAll(Pageable pageable) {
+		return postRepo.findAllProjectedBy(PostListView.class, pageable);
 	}
 
 	@Override

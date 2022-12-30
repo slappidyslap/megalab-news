@@ -79,9 +79,9 @@ class PostControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(jsonPath("$.page.content").isArray())
-				.andExpect(jsonPath("$.page.content", hasSize(2)))
-				.andExpect(jsonPath("$.page.totalElements", is(2)));
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content", hasSize(2)))
+				.andExpect(jsonPath("$.totalElements", is(2)));
 	}
 
 	@Test
@@ -165,9 +165,9 @@ class PostControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(jsonPath("$.page.content").isArray())
-				.andExpect(jsonPath("$.page.content", hasSize(3)))
-				.andExpect(jsonPath("$.page.totalElements", is(3)));
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content", hasSize(3)))
+				.andExpect(jsonPath("$.totalElements", is(3)));
 	}
 
 	@Test

@@ -2,8 +2,8 @@ package kg.musabaev.megalabnews.aspect;
 
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.dto.PostPageResponse;
 import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.projection.PostListView;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -65,8 +66,8 @@ public class SimplePostServiceLoggingAspect {
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* getAll(..)))",
 			returning = "r")
-	void afterReturningMethodGetAll(PostPageResponse r) {
-		log.debug(TOTAL_NUMBER_POSTS, r.page().getTotalElements());
+	void afterReturningMethodGetAll(Page<PostListView> r) {
+		log.debug(TOTAL_NUMBER_POSTS, r.getTotalElements());
 	}
 
 
