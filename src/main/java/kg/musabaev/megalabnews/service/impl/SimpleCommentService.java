@@ -38,11 +38,10 @@ public class SimpleCommentService implements CommentService {
 				? getCommentReferenceByIdElseThrow(postId, dto.parentId())
 				: null;
 
-		Comment newComment = new Comment();
+		Comment newComment = commentMapper.toModel(dto);
 		newComment.setParent(parentComment);
 		newComment.setPost(post);
 		newComment.setCommentator(0L); // TODO переделать когда будет spring security
-		newComment.setContent(dto.content());
 
 		return commentMapper.toDto(commentRepo.save(newComment));
 	}

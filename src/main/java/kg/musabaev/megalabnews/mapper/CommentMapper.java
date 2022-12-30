@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.mapper;
 
+import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import kg.musabaev.megalabnews.model.Comment;
 import org.mapstruct.Mapper;
@@ -12,4 +13,7 @@ public interface CommentMapper {
 	@Mapping(target = "parentId", source = "parent.id")
 	@Mapping(target = "postId", source = "post.id")
 	NewOrUpdateCommentResponse toDto(Comment comment);
+
+//	@Mapping()
+	Comment toModel(NewCommentRequest dto);
 }
