@@ -3,6 +3,8 @@ package kg.musabaev.megalabnews.service.impl;
 import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import kg.musabaev.megalabnews.dto.UpdateCommentRequest;
+import kg.musabaev.megalabnews.exception.CommentNotFoundException;
+import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.mapper.CommentMapper;
 import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
@@ -17,9 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -34,18 +33,10 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse save(Long postId, NewCommentRequest dto) {
-		boolean isPostExistsById = postRepo.existsById(postId);
-		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
-		Post post = postRepo.getReferenceById(postId);
-
-		Comment parentComment = null;
-		if (dto.parentId() != null) {
-			boolean isParentCommentExistsByIdInPost =
-					commentRepo.existsByIdAndPostId(dto.parentId(), postId);
-			if (!isParentCommentExistsByIdInPost)
-				throw new ResponseStatusException(NOT_FOUND, "parent comment not found");
-			parentComment = commentRepo.getReferenceById(dto.parentId());
-		}
+		Post post = getPostReferenceByIdElseThrow(postId);
+		Comment parentComment = dto.parentId() != null
+				? getCommentReferenceByIdElseThrow(postId, dto.parentId())
+				: null;
 
 		Comment newComment = new Comment();
 		newComment.setParent(parentComment);
@@ -59,8 +50,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
-		boolean isPostExistsById = postRepo.existsById(postId);
-		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
+		assertPostExistsByIdElseThrow(postId);
 
 		return commentRepo.findRootsByPostIdAndParentIsNull(postId, pageable);
 	}
@@ -68,10 +58,8 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
-		boolean isPostExistsById = postRepo.existsById(postId);
-		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
-		boolean isCommentExists = commentRepo.existsByIdAndPostId(parentCommentId, postId);
-		if (!isCommentExists) throw new ResponseStatusException(NOT_FOUND, "comment not found");
+		assertPostExistsByIdElseThrow(postId);
+		assertCommentExistsByIdElseThrow(postId, parentCommentId);
 
 		return commentRepo.findChildrenByParentIdAndPostId(parentCommentId, postId, pageable);
 	}
@@ -79,24 +67,38 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse update(Long postId, Long commentId, UpdateCommentRequest dto) {
-		boolean isPostExistsById = postRepo.existsById(postId);
-		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
+		assertPostExistsByIdElseThrow(postId);
 
 		Comment updatedComment = commentRepo.findByIdAndPostId(commentId, postId).map(comment -> {
 			comment.setContent(dto.content());
 
 			return commentRepo.save(comment);
-		}).orElseThrow(() -> {
-			throw new ResponseStatusException(NOT_FOUND, "comment not found");
-		});
+		}).orElseThrow(() -> { throw new CommentNotFoundException();});
 		return commentMapper.toDto(updatedComment);
 	}
 
 	@Override
 	@Transactional
 	public void deleteById(Long postId, Long commentId) {
-		boolean isCommentExists = commentRepo.existsByIdAndPostId(commentId, postId);
-		if (!isCommentExists) throw new ResponseStatusException(NOT_FOUND);
+		assertCommentExistsByIdElseThrow(postId, commentId);
 		commentRepo.deleteById(commentId);
+	}
+
+	private Post getPostReferenceByIdElseThrow(Long postId) {
+		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
+		return postRepo.getReferenceById(postId);
+	}
+
+	private void assertPostExistsByIdElseThrow(Long postId) {
+		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
+	}
+
+	private Comment getCommentReferenceByIdElseThrow(Long postId, Long commentId) {
+		if (!commentRepo.existsByIdAndPostId(commentId, postId)) throw new CommentNotFoundException();
+		return commentRepo.getReferenceById(commentId);
+	}
+
+	private void assertCommentExistsByIdElseThrow(Long postId, Long commentId) {
+		if (!commentRepo.existsByIdAndPostId(commentId, postId)) throw new CommentNotFoundException();
 	}
 }
