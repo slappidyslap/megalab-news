@@ -14,6 +14,5 @@ public interface CommentMapper {
 	@Mapping(target = "postId", source = "post.id")
 	NewOrUpdateCommentResponse toDto(Comment comment);
 
-//	@Mapping()
 	Comment toModel(NewCommentRequest dto);
 }

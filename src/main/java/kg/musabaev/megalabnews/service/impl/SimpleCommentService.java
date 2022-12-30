@@ -4,14 +4,13 @@ import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import kg.musabaev.megalabnews.dto.UpdateCommentRequest;
 import kg.musabaev.megalabnews.exception.CommentNotFoundException;
-import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.mapper.CommentMapper;
 import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
-import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.projection.CommentListView;
 import kg.musabaev.megalabnews.service.CommentService;
+import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Primary;
@@ -26,16 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class SimpleCommentService implements CommentService {
 
-	private final PostRepo postRepo;
 	private final CommentRepo commentRepo;
 	private final CommentMapper commentMapper;
 
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse save(Long postId, NewCommentRequest dto) {
-		Post post = getPostReferenceByIdElseThrow(postId);
+		Post post = Utils.getPostReferenceByIdElseThrow(postId);
 		Comment parentComment = dto.parentId() != null
-				? getCommentReferenceByIdElseThrow(postId, dto.parentId())
+				? Utils.getCommentReferenceByIdElseThrow(postId, dto.parentId())
 				: null;
 
 		Comment newComment = commentMapper.toModel(dto);
@@ -49,7 +47,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
-		assertPostExistsByIdElseThrow(postId);
+		Utils.assertPostExistsByIdElseThrow(postId);
 
 		return commentRepo.findRootsByPostIdAndParentIsNull(postId, pageable);
 	}
@@ -57,8 +55,8 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
-		assertPostExistsByIdElseThrow(postId);
-		assertCommentExistsByIdElseThrow(postId, parentCommentId);
+		Utils.assertPostExistsByIdElseThrow(postId);
+		Utils.assertCommentExistsByIdElseThrow(postId, parentCommentId);
 
 		return commentRepo.findChildrenByParentIdAndPostId(parentCommentId, postId, pageable);
 	}
@@ -66,7 +64,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public NewOrUpdateCommentResponse update(Long postId, Long commentId, UpdateCommentRequest dto) {
-		assertPostExistsByIdElseThrow(postId);
+		Utils.assertPostExistsByIdElseThrow(postId);
 
 		Comment updatedComment = commentRepo.findByIdAndPostId(commentId, postId).map(comment -> {
 			comment.setContent(dto.content());
@@ -79,25 +77,7 @@ public class SimpleCommentService implements CommentService {
 	@Override
 	@Transactional
 	public void deleteById(Long postId, Long commentId) {
-		assertCommentExistsByIdElseThrow(postId, commentId);
+		Utils.assertCommentExistsByIdElseThrow(postId, commentId);
 		commentRepo.deleteById(commentId);
-	}
-
-	private Post getPostReferenceByIdElseThrow(Long postId) {
-		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
-		return postRepo.getReferenceById(postId);
-	}
-
-	private void assertPostExistsByIdElseThrow(Long postId) {
-		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
-	}
-
-	private Comment getCommentReferenceByIdElseThrow(Long postId, Long commentId) {
-		if (!commentRepo.existsByIdAndPostId(commentId, postId)) throw new CommentNotFoundException();
-		return commentRepo.getReferenceById(commentId);
-	}
-
-	private void assertCommentExistsByIdElseThrow(Long postId, Long commentId) {
-		if (!commentRepo.existsByIdAndPostId(commentId, postId)) throw new CommentNotFoundException();
 	}
 }
