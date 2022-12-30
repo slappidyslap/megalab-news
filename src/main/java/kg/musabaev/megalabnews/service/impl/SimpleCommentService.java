@@ -8,8 +8,7 @@ import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
-import kg.musabaev.megalabnews.repository.projection.NonRootCommentListView;
-import kg.musabaev.megalabnews.repository.projection.RootCommentListView;
+import kg.musabaev.megalabnews.repository.projection.CommentListView;
 import kg.musabaev.megalabnews.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -59,7 +58,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Page<RootCommentListView> getRootsByPostId(Long postId, Pageable pageable) {
+	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
 		boolean isPostExistsById = postRepo.existsById(postId);
 		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
 
@@ -68,7 +67,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Page<NonRootCommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
+	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
 		boolean isPostExistsById = postRepo.existsById(postId);
 		if (!isPostExistsById) throw new ResponseStatusException(NOT_FOUND, "post not found");
 		boolean isCommentExists = commentRepo.existsByIdAndPostId(parentCommentId, postId);

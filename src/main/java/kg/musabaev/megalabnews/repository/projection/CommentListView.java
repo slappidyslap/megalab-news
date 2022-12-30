@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
-public interface RootCommentListView {
+public interface CommentListView {
 	Long getId();
 
 	@JsonProperty("commentatorId")
