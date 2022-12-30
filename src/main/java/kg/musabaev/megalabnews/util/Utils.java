@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -58,12 +60,51 @@ public class Utils {
 			throw new CommentNotFoundException();
 	}
 
+	/**
+	 * Итерирует checks и когда находит true,
+	 * метод заканчивает свое выполнение
+	 * (какое-то ожидаемое исключение было сгенерировано),
+	 * иначе в логи напишет, что произошло другое исключение
+	 * @param actualException действительное исключение
+	 * @param checks список проверок произошло ли исключение или нет
+	 */
+	public static void iterateChainOfChecks(
+			Exception actualException,
+			List<Boolean> checks) {
+		occurredAnotherException:
+		{
+			for (boolean check : checks)
+				if (check) break occurredAnotherException;
+			log.warn("Произошло другое исключение:", actualException);
+		}
+	}
+
+	public static boolean ifCommentNotFound(Exception e, Runnable runnable) {
+		return ifExceptionEqualsElseLog(e, CommentNotFoundException.class, runnable);
+	}
+
+	public static boolean ifPostNotFound(Exception e, Runnable runnable) {
+		return ifExceptionEqualsElseLog(e, PostNotFoundException.class, runnable);
+	}
+
 	public static boolean ifInternalServerError(Exception e, Runnable runnable) {
 		return ifResponseStatusExceptionWithStatusElseLog(e, INTERNAL_SERVER_ERROR, runnable);
 	}
 
+	@Deprecated
 	public static boolean ifNotFound(Exception e, Runnable runnable) {
 		return ifResponseStatusExceptionWithStatusElseLog(e, NOT_FOUND, runnable);
+	}
+
+	public static boolean ifExceptionEqualsElseLog(
+			Exception throwing,
+			Class<? extends Exception> exceptedException,
+			Runnable runnable) {
+		if (exceptedException == throwing.getClass()) {
+			runnable.run();
+			return true;
+		}
+		return false;
 	}
 
 	public static boolean ifResponseStatusExceptionWithStatusElseLog(Exception e, HttpStatus status, Runnable runnable) {
@@ -72,7 +113,6 @@ public class Utils {
 			runnable.run();
 			return true;
 		}
-		log.warn("Произошло другое исключение:", e);
 		return false;
 	}
 }
