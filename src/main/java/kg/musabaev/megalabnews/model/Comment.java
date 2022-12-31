@@ -31,7 +31,8 @@ public class Comment {
 			cascade = {
 					CascadeType.MERGE, CascadeType.PERSIST,
 					CascadeType.PERSIST, CascadeType.REFRESH
-			})
+			},
+			optional = false)
 	@JoinColumn(name = "post_id", nullable = false, updatable = false)
 	Post post;
 
@@ -40,13 +41,12 @@ public class Comment {
 			cascade = {
 					CascadeType.MERGE, CascadeType.PERSIST,
 					CascadeType.PERSIST, CascadeType.REFRESH
-			},
-			optional = false)
+			})
 	@JoinColumn(name = "parent_comment_id", updatable = false)
 	@Nullable
 	Comment parent;
 
-	@Column(nullable = false, updatable = false)
+	@Column(name = "commentator_id", nullable = false, updatable = false)
 	Long commentator;
 
 	@Column(nullable = false, length = 2000)

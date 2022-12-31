@@ -37,7 +37,7 @@ public class Post {
 	String description = "";
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(nullable = false, updatable = false)
 	LocalDate createdDate;
 
 	@ElementCollection(fetch = FetchType.LAZY)

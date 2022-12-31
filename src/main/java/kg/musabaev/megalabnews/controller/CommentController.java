@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,9 @@ public class CommentController {
 	ResponseEntity<NewOrUpdateCommentResponse> saveComment(
 			@PathVariable Long postId,
 			@Valid @RequestBody NewCommentRequest dto) {
-		return ResponseEntity.ok(commentService.save(postId, dto));
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body((commentService.save(postId, dto)));
 	}
 
 	@GetMapping("/{postId}/comments")

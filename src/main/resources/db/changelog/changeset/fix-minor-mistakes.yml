@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: fix-minor-mistakes
+      author: Eldiyar
+      changes:
+        - renameColumn:
+            tableName: comments
+            oldColumnName: commentator
+            newColumnName: commentator_id
+        - addNotNullConstraint:
+            constraintName: posts_created_date_not_null
+            tableName: posts
+            columnName: created_date

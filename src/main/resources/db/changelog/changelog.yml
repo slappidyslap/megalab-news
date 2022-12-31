@@ -11,3 +11,6 @@ databaseChangeLog:
   - include:
       file: changeset/create-table-by-comment-entity.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/fix-minor-mistakes.yml
+      relativeToChangelogFile: true
