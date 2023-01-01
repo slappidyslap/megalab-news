@@ -28,7 +28,6 @@ public class PostCachingAspect {
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
 	void targetPackage() {}
 
-	// Кастомный @CachePut
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* update(..))",
 			returning = "responseDto")
@@ -46,19 +45,5 @@ public class PostCachingAspect {
 		cachePostItem.put(postId, cachedPost);
 
 		log.debug("Обновлены данные у кэша {} с ключом {}", cacheName, postId);
-	}
-
-	@AfterReturning(
-			pointcut = "targetPackage() && execution(* save(..))",
-			returning = "newPostDto")
-	void  deleteCacheItemByPostIdAfterSaving(NewOrUpdatePostResponse newPostDto) {
-		Long postId = newPostDto.id();
-		String cacheName = SimplePostService.postItemCacheName;
-
-		Cache cachePostItem = cacheManager.getCache(cacheName);
-		if (Objects.isNull(cachePostItem)) return;
-		cachePostItem.evict(postId);
-
-		log.debug("Удалены данные у кэша {} с ключом {}", cacheName, postId);
 	}
 }

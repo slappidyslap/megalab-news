@@ -17,6 +17,7 @@ import org.aspectj.lang.JoinPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -48,6 +49,7 @@ public class SimplePostService implements PostService {
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
 
+	public static final String postListCacheName = "postList";
 	public static final String postItemCacheName = "postItem";
 	public static final Set<String> validImageFormats = Set.of(
 			MediaType.IMAGE_JPEG_VALUE,
@@ -67,10 +69,10 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional
+	@Cacheable(postListCacheName)
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
-		if (postRepo.existsByTitle(newOrUpdatePostRequest.title())) {
+		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
-		}
 		Post newPost = postMapper.toPostModel(newOrUpdatePostRequest);
 
 		return postMapper.toPostDto(postRepo.save(newPost));
@@ -78,6 +80,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(postListCacheName)
 	public Page<PostListView> getAll(Pageable pageable) {
 		return postRepo.findAllProjectedBy(PostListView.class, pageable);
 	}
@@ -96,7 +99,10 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional
-	@CacheEvict(postItemCacheName)
+	@Caching(evict = {
+			@CacheEvict(postItemCacheName),
+			@CacheEvict(postListCacheName)
+	})
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
@@ -110,6 +116,7 @@ public class SimplePostService implements PostService {
 	 */
 	@Override
 	@Transactional
+	@CacheEvict(postListCacheName)
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
 			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
@@ -143,7 +150,6 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
-//	@Cacheable("postImage")
 	public Resource getImageByFilename(String imageFilename) {
 		try {
 			var image = new UrlResource(storage.resolve(imageFilename).toUri());
@@ -172,7 +178,6 @@ public class SimplePostService implements PostService {
 		return validImageFormats.contains(imageFormat);
 	}
 
-	//	@CacheEvict("postImage")
 	private void deleteImageInStorageIfExists(String imageFilename) {
 		if (imageFilename == null) return;
 		try {
