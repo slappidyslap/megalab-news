@@ -46,7 +46,7 @@ public class CommentController {
 		return ResponseEntity.ok(commentService.getChildrenByParentId(postId, parentCommentId, pageable));
 	}
 
-	@PutMapping("/{postId}/comments/{commentId}")
+	@PatchMapping("/{postId}/comments/{commentId}")
 	ResponseEntity<NewOrUpdateCommentResponse> updateCommentById(
 			@PathVariable Long postId,
 			@PathVariable Long commentId,
