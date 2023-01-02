@@ -24,6 +24,7 @@ import static kg.musabaev.megalabnews.util.Utils.*;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SimpleCommentServiceLoggingAspect {
 
+	static String COMMENT_BY_ID_DELETED = "Комментарий с id {} удален";
 	static String NEW_COMMENT_SAVED = "Новый комментарий: {}";
 	static String TOTAL_NUMBER_ROOT_COMMENTS_OF_POST = "У публикации с id {} всего {} корневых комментариев";
 	static String TOTAL_NUMBER_CHILD_COMMENTS_OF_PARENT_COMMENT = "У родительского комментария с {} всего {} дочерних комментариев";
@@ -114,7 +115,7 @@ public class SimpleCommentServiceLoggingAspect {
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* deleteById(..)))")
 	void afterReturningMethodDeleteById(JoinPoint jp) {
-		log.debug(COMMENT_BY_ID_NOT_FOUND, jp.getArgs()[1]);
+		log.debug(COMMENT_BY_ID_DELETED, jp.getArgs()[1]);
 	}
 
 

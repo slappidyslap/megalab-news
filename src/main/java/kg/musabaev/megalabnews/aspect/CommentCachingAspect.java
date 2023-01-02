@@ -1,6 +1,6 @@
 package kg.musabaev.megalabnews.aspect;
 
-import kg.musabaev.megalabnews.dto.NewCommentRequest;
+import kg.musabaev.megalabnews.dto.NewOrUpdateCommentResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,20 +31,23 @@ public class CommentCachingAspect {
 	void targetPackage() {
 	}
 
-	@AfterReturning("targetPackage() && execution(* save(..))")
-	void onSaveCommentDeleteCache(JoinPoint jp) {
-		Long postId = ((long) jp.getArgs()[0]);
-		Long parentId = ((NewCommentRequest) jp.getArgs()[1]).parentId();
+	@AfterReturning(
+			value = "targetPackage() && execution(* save(..)) ||" +
+					"targetPackage() && execution(* update(..))",
+			returning = "dto")
+	void onSaveCommentDeleteCache(NewOrUpdateCommentResponse dto) {
+		Long postId = dto.postId();
+		Long parentId = dto.parentId();
 
 		if (parentId == null) deleteRootCommentsCacheByPostId(postId);
 		else deleteChildCommentsCacheByPostIdAndParentCommentId(postId, parentId);
 	}
 
-	@AfterReturning("targetPackage() && execution(* update(..)) || " +
-			"targetPackage() && execution(* deleteById(..))")
+	@AfterReturning("targetPackage() && execution(* deleteById(..))")
 	void onUpdateAndDeleteCommentDeleteCache(JoinPoint jp) {
-		deleteRootCommentsCacheByPostId((Long) jp.getArgs()[0]);
-		deleteChildCommentsCacheByPostIdAndParentCommentId((Long) jp.getArgs()[0], (Long) jp.getArgs()[1]);
+		Long postId = (Long) jp.getArgs()[0];
+		deleteRootCommentsCacheByPostId(postId);
+		deleteChildCommentsCacheByPostIdAndAnyCommentId(postId);
 	}
 
 	private void deleteRootCommentsCacheByPostId(Long postId) {
@@ -66,6 +69,18 @@ public class CommentCachingAspect {
 			var triple = (Triple<Long, Long, Pageable>) entry.getKey();
 
 			boolean isEquals = triple.getLeft().equals(postId) && triple.getMiddle().equals(parentId);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, childCommentsCacheName, triple);
+			return isEquals;
+		});
+	}
+
+	private void deleteChildCommentsCacheByPostIdAndAnyCommentId(Long postId) {
+		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(childCommentsCacheName);
+
+		store.entrySet().removeIf(entry -> {
+			var triple = (Triple<Long, Long, Pageable>) entry.getKey();
+
+			boolean isEquals = triple.getLeft().equals(postId);
 			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, childCommentsCacheName, triple);
 			return isEquals;
 		});
