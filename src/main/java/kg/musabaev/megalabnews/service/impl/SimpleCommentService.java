@@ -14,9 +14,7 @@ import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,10 +71,6 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = childCommentsCacheName, condition = "#result.parentId() != null"),
-			@CacheEvict(cacheNames = rootCommentsCacheName, condition = "#result.parentId() == null")
-	})
 	public NewOrUpdateCommentResponse update(Long postId, Long commentId, UpdateCommentRequest dto) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 
@@ -90,10 +84,6 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = childCommentsCacheName, condition = "#result.parentId() != null"),
-			@CacheEvict(cacheNames = rootCommentsCacheName, condition = "#commentRepo")
-	})
 	public void deleteById(Long postId, Long commentId) {
 		Utils.assertCommentExistsByIdOrElseThrow(postId, commentId);
 		commentRepo.deleteById(commentId);
