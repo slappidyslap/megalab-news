@@ -63,7 +63,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(value = childCommentsCacheName)
+	@Cacheable(value = childCommentsCacheName, keyGenerator = "childCommentCacheKeyGenerator")
 	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		Utils.assertCommentExistsByIdOrElseThrow(postId, parentCommentId);

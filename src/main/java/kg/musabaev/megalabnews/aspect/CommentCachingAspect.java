@@ -4,11 +4,13 @@ import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentMap;
@@ -19,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 @Log4j2
 public class CommentCachingAspect {
 
+	public static final String CACHE_DELETED_BY_KEY = "Удалено значение у кэша {} по ключу {}";
 	private final CacheManager cacheManager;
 
 	public static final String childCommentsCacheName = "childCommentList";
@@ -31,24 +34,34 @@ public class CommentCachingAspect {
 	@AfterReturning("targetPackage() && execution(* save(..))")
 	void onSaveCommentDeleteCache(JoinPoint jp) {
 		Long postId = ((long) jp.getArgs()[0]);
-		var dto = (NewCommentRequest) jp.getArgs()[1];
+		Long parentId = ((NewCommentRequest) jp.getArgs()[1]).parentId();
 
-		if (dto.parentId() == null) {
-			ConcurrentMap<Object, Object> store = (ConcurrentMap<Object, Object>) cacheManager
-					.getCache(rootCommentsCacheName)
-					.getNativeCache();
+
+		if (parentId == null) {
+			ConcurrentMap<Object, Object> store = getStoreFromCacheManager(rootCommentsCacheName);
 
 			store.entrySet().removeIf(entry -> {
-				Pair<Object, Object> pair = (Pair<Object, Object>) entry.getKey(); // key
+				var pair = (Pair<Long, Pageable>) entry.getKey(); // key
 
-				boolean isPostIdEquals = pair.getKey().equals(postId);
-				if (isPostIdEquals) log.debug("Удалено значение у кэша {} по ключу {}", rootCommentsCacheName, pair);
-				return isPostIdEquals;
+				boolean isEquals = pair.getKey().equals(postId);
+				if (isEquals) log.debug(CACHE_DELETED_BY_KEY, rootCommentsCacheName, pair);
+				return isEquals;
 			});
-		} /*else {
-			ConcurrentMap<Object, Object> store = (ConcurrentMap<Object, Object>) cacheManager.getCache(rootCommentsCacheName).getNativeCache();
+		} else {
+			ConcurrentMap<Object, Object> store = getStoreFromCacheManager(childCommentsCacheName);
+
 			store.entrySet().removeIf(entry -> {
+				var triple = (Triple<Long, Long, Pageable>) entry.getKey();
+
+				boolean isEquals = triple.getLeft().equals(postId) && triple.getMiddle().equals(parentId);
+				if (isEquals) log.debug(CACHE_DELETED_BY_KEY, childCommentsCacheName, triple);
+				return isEquals;
 			});
-		}*/
+		}
+	}
+	private ConcurrentMap<Object, Object> getStoreFromCacheManager(String cacheName) {
+		return (ConcurrentMap<Object, Object>) cacheManager
+				.getCache(cacheName)
+				.getNativeCache();
 	}
 }
