@@ -1,7 +1,7 @@
 ## Проблема
 При `allEntries = true` в хранилище (в данном случае реализация `ConcurrentMapCacheManager` предоставляет `ConcurrentHashMap`) удаляются все бакеты.
 То есть, при обращении к корневым комментам 1 поста, эти комменты кэшируются по `postId` (в данном случае 1) и `Pageable` объекту. Далее, если добавить новый коммент на 2 пост, при `allEntries = true` удаляет вместе еще закэшированные данные об корневых комментах 1 поста, иначе не удаляет свои ранее закэшированные данные (данные об корневых комментах 2 поста)
-Попытка №1
+
 https://github.com/slappidyslap/megalab-news/blob/7be98c1c274bfc2f535df85092dec88553a5dbeb/src/main/java/kg/musabaev/megalabnews/aspect/CommentCachingAspect.java?plain=1#L81-L103
 
 ## А что делать?
