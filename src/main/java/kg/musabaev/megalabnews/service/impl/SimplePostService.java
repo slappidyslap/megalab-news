@@ -71,7 +71,10 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional
-	@Cacheable(postListCacheName)
+	@Caching(evict = {
+			@CacheEvict(postListCacheName),
+			@CacheEvict(value = postItemCacheName, key = "#result.id()")
+	})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
