@@ -28,6 +28,6 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
 	@Query("SELECT c.id FROM Comment c WHERE c.post.id = :postId AND c.parent IS NULL")
 	List<Long> getAllRootCommentId(@Param("postId") Long postId);
 
-	@Query("SELECT c.id FROM Comment c WHERE c.parent.id = :parentId")
-	List<Long> getAllChildCommentIdByParentId(@Param("parentId") Long parentId);
+	@Query("SELECT c.id FROM Comment c WHERE c.parent.id = :parentId AND c.post.id = :postId")
+	List<Long> getAllChildCommentIdByParentId(@Param("postId") Long postId, @Param("parentId") Long parentId);
 }

@@ -60,6 +60,15 @@ public class Utils {
 			throw new CommentNotFoundException();
 	}
 
+	public static void deleteCommentsRecursively(Long postId, List<Long> commentsId) {
+		if (commentsId.isEmpty()) return;
+		for (Long commentId : commentsId) {
+			deleteCommentsRecursively(
+					postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
+			commentRepo.deleteById(commentId);
+		}
+	}
+
 	/**
 	 * Итерирует checks и когда находит true,
 	 * метод заканчивает свое выполнение

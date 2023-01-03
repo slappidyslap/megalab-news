@@ -84,7 +84,7 @@ public class SimpleCommentService implements CommentService {
 	@Transactional
 	public void deleteById(Long postId, Long commentId) {
 		Utils.assertCommentExistsByIdOrElseThrow(postId, commentId);
-		commentRepo.deleteAllByParentId(commentId);
+		Utils.deleteCommentsRecursively(postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
 		commentRepo.deleteById(commentId);
 	}
 }

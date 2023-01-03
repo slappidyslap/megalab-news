@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -110,18 +109,8 @@ public class SimplePostService implements PostService {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
 				getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
-		deletePostCommentsRecursively(commentRepo.getAllRootCommentId(postId));
+		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
 		postRepo.deleteById(postId);
-	}
-
-
-	private void deletePostCommentsRecursively(List<Long> commentsId) {
-		if (commentsId.isEmpty()) return;
-		for (Long id : commentsId) {
-			List<Long> childComments = commentRepo.getAllChildCommentIdByParentId(id);
-			deletePostCommentsRecursively(childComments);
-			commentRepo.deleteById(id);
-		}
 	}
 
 	/**
