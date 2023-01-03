@@ -10,6 +10,7 @@ VALUES (1, '1 c - 1 p', 1, 0, current_date),
 
 INSERT INTO comments (comment_id, content, post_id, parent_comment_id, commentator_id, created_date)
 VALUES (5,'1 c - 1 c - 1 p', 1, 1, 0, current_date),
-       (6,'1 c - 2 c - 2 p', 2, 4, 0, current_date);
+       (6,'1 c - 2 c - 2 p', 2, 4, 0, current_date),
+       (7,'1 c - 1 c - 2 c - 2 p', 2, 6, 0, current_date);
 
-ALTER TABLE comments ALTER COLUMN comment_id RESTART WITH 7;
+ALTER TABLE comments ALTER COLUMN comment_id RESTART WITH 8;

@@ -120,7 +120,7 @@ public class CommentControllerTest {
 						.content(objectMapper.writeValueAsString(newCommentDto)))
 				.andDo(print())
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", is(7)))
+				.andExpect(jsonPath("$.id", is(8)))
 				.andExpect(jsonPath("$.postId", is(1)))
 				.andExpect(jsonPath("$.parentId", nullValue()))
 				.andExpect(jsonPath("$.commentatorId", is(0)))
@@ -146,7 +146,7 @@ public class CommentControllerTest {
 						.content(objectMapper.writeValueAsString(newCommentDto)))
 				.andDo(print())
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", is(8)))
+				.andExpect(jsonPath("$.id", is(9)))
 				.andExpect(jsonPath("$.postId", is(2)))
 				.andExpect(jsonPath("$.parentId", is(3)))
 				.andExpect(jsonPath("$.content", is(newCommentDto.content())));
@@ -201,18 +201,44 @@ public class CommentControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(2))); // #shouldBeStatus201_whenSavingCommentAsRoot
+
+		mvc.perform(delete(apiPrefix + "/1/comments/3"))
+				.andDo(print())
+				.andExpect(status().isNotFound());
+
+		mvc.perform(delete(apiPrefix + "/1/comments/4"))
+				.andDo(print())
+				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	@Order(7)
 	void shouldBeStatus200_whenDeleteChildComment() throws Exception {
-		mvc.perform(delete(apiPrefix + "/2/comments/6"))
-				.andDo(print())
+		mvc.perform(get(apiPrefix + "/2/comments/7"))
 				.andExpect(status().isOk());
+
+		mvc.perform(delete(apiPrefix + "/2/comments/6"))
+				.andExpect(status().isOk());
+
+		mvc.perform(get(apiPrefix + "/2/comments/7"))
+				.andExpect(status().isNotFound());
 
 		mvc.perform(get(apiPrefix + "/2/comments/4"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(0)));
+	}
+
+	@Test
+	@Order(8)
+	void shouldCascadeDelete_whenDeletePost() throws Exception {
+		mvc.perform(get(apiPrefix + "/1/comments/1"))
+				.andExpect(status().isOk());
+
+		mvc.perform(delete(apiPrefix + "/1"))
+				.andExpect(status().isOk());
+
+		mvc.perform(get(apiPrefix + "/1/comments/1"))
+				.andExpect(status().isNotFound());
 	}
 }
