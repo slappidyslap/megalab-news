@@ -83,8 +83,10 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional(readOnly = true)
 	@Cacheable(postListCacheName)
-	public Page<PostListView> getAll(Pageable pageable) {
-		return postRepo.findAllProjectedBy(PostListView.class, pageable);
+	public Page<PostListView> getAll(Pageable pageable, Set<String> tags) {
+		if (tags == null || tags.isEmpty())
+			return postRepo.findAllProjectedBy(pageable);
+		return postRepo.findAllByTagsIn(tags, pageable);
 	}
 
 	@Override

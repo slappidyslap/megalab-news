@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
@@ -34,8 +36,10 @@ public class PostController {
 	}
 
 	@GetMapping
-	ResponseEntity<Page<PostListView>> getAllPosts(@PageableDefault Pageable pageable) {
-		return ResponseEntity.ok(postService.getAll(pageable));
+	ResponseEntity<Page<PostListView>> getAllPosts(
+			@PageableDefault Pageable pageable,
+			@RequestParam(name = "tags", required = false) Set<String> tags) {
+		return ResponseEntity.ok(postService.getAll(pageable, tags));
 	}
 
 	@GetMapping("/{postId}")

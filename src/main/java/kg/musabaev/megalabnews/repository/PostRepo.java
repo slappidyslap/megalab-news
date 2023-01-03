@@ -1,6 +1,7 @@
 package kg.musabaev.megalabnews.repository;
 
 import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.projection.PostListView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,9 @@ import java.util.Set;
 @Repository
 public interface PostRepo extends JpaRepository<Post, Long> {
 
-	<T> Page<T> findAllProjectedBy(Class<T> type, Pageable pageable);
+	Page<PostListView> findAllProjectedBy(Pageable pageable);
+
+	Page<PostListView> findAllByTagsIn(Set<String> tags, Pageable pageable);
 
 	boolean existsByTitle(String title);
 

@@ -9,11 +9,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 public interface PostService {
 
 	NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest);
 
-	Page<PostListView> getAll(Pageable pageable);
+	Page<PostListView> getAll(Pageable pageable, Set<String> tags);
 
 	Post getById(Long postId);
 
