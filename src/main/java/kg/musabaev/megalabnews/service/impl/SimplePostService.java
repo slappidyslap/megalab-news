@@ -7,6 +7,7 @@ import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,6 +50,7 @@ public class SimplePostService implements PostService {
 
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
+	private final CommentRepo commentRepo;
 
 	public static final String postListCacheName = "postList";
 	public static final String postItemCacheName = "postItem";
@@ -101,14 +104,24 @@ public class SimplePostService implements PostService {
 	@Transactional
 	@Caching(evict = {
 			@CacheEvict(postItemCacheName),
-			@CacheEvict(postListCacheName)
+			@CacheEvict(postListCacheName),
 	})
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
 				getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
+		deletePostCommentsRecursively(commentRepo.getAllRootCommentId(postId));
 		postRepo.deleteById(postId);
+	}
 
+
+	private void deletePostCommentsRecursively(List<Long> commentsId) {
+		if (commentsId.isEmpty()) return;
+		for (Long id : commentsId) {
+			List<Long> childComments = commentRepo.getAllChildCommentIdByParentId(id);
+			deletePostCommentsRecursively(childComments);
+			commentRepo.deleteById(id);
+		}
 	}
 
 	/**

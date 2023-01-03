@@ -5,8 +5,11 @@ import kg.musabaev.megalabnews.repository.projection.CommentListView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,4 +24,10 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
 	Optional<Comment> findByIdAndPostId(Long commentId, Long postId);
 
 	void deleteAllByParentId(Long parentId);
+
+	@Query("SELECT c.id FROM Comment c WHERE c.post.id = :postId AND c.parent IS NULL")
+	List<Long> getAllRootCommentId(@Param("postId") Long postId);
+
+	@Query("SELECT c.id FROM Comment c WHERE c.parent.id = :parentId")
+	List<Long> getAllChildCommentIdByParentId(@Param("parentId") Long parentId);
 }
