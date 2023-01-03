@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentMap;
 
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.childCommentsCacheName;
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootCommentsCacheName;
+
 @Component
 @Aspect
 @RequiredArgsConstructor
@@ -24,8 +27,6 @@ public class CommentCachingAspect {
 	private final CacheManager cacheManager;
 
 	public static final String CACHE_DELETED_BY_KEY = "Удалено значение у кэша {} по ключу {}";
-	public static final String childCommentsCacheName = "childCommentList";
-	public static final String rootCommentsCacheName = "rootCommentList";
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimpleCommentService)")
 	void targetPackage() {
@@ -43,7 +44,8 @@ public class CommentCachingAspect {
 		else deleteChildCommentsCacheByPostIdAndParentCommentId(postId, parentId);
 	}
 
-	@AfterReturning("targetPackage() && execution(* deleteById(..))")
+	@AfterReturning("targetPackage() && execution(* deleteById(..)) ||" +
+			"execution(* kg.musabaev.megalabnews.service.impl.SimplePostService.deleteById(..))")
 	void onUpdateAndDeleteCommentDeleteCache(JoinPoint jp) {
 		Long postId = (Long) jp.getArgs()[0];
 		deleteRootCommentsCacheByPostId(postId);
