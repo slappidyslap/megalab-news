@@ -9,7 +9,10 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,7 @@ import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootComm
 @Aspect
 @RequiredArgsConstructor
 @Log4j2
+@ConditionalOnBean(ConcurrentMapCacheManager.class)
 public class CommentCachingAspect {
 
 	private final CacheManager cacheManager;
@@ -88,6 +92,9 @@ public class CommentCachingAspect {
 		});
 	}
 
+	/**
+	 * @see ConcurrentMapCache#getNativeCache()
+	 */
 	private ConcurrentMap<Object, Object> getStoreFromCacheManager(String cacheName) {
 		return (ConcurrentMap<Object, Object>) cacheManager
 				.getCache(cacheName)

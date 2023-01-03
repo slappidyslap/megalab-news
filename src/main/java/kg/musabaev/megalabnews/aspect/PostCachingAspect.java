@@ -10,8 +10,10 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -20,6 +22,7 @@ import java.util.Objects;
 @Aspect
 @RequiredArgsConstructor
 @Log4j2
+@ConditionalOnBean(ConcurrentMapCacheManager.class)
 public class PostCachingAspect {
 
 	private final CacheManager cacheManager;
