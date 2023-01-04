@@ -14,3 +14,9 @@ databaseChangeLog:
   - include:
       file: changeset/fix-minor-mistakes.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/create-tables-by-user-entity.yml
+      relativeToChangelogFile: true
+  - include:
+      file: changeset/add-column-author-in-posts-table.yml
+      relativeToChangelogFile: true

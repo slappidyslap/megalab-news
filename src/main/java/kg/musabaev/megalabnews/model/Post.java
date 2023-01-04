@@ -36,6 +36,16 @@ public class Post {
 	@Column(nullable = false, length = 500)
 	String description = "";
 
+	@ManyToOne(
+			fetch = FetchType.LAZY,
+			cascade = {
+					CascadeType.MERGE, CascadeType.PERSIST,
+					CascadeType.PERSIST, CascadeType.REFRESH
+			},
+			optional = false)
+	@JoinColumn(name = "author_id", updatable = false, nullable = false)
+	User author;
+
 	@CreatedDate
 	@Column(nullable = false, updatable = false)
 	LocalDate createdDate;
