@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-author-in-posts-table
+      author: Eldiyar
+      changes:
+        - addColumn:
+            tableName: posts
+            columns:
+              - column:
+                  name: author_id
+                  type: bigint
+                  valueNumeric: 1
+        - addNotNullConstraint:
+            tableName: posts
+            columnName: author_id
+            constraintName: posts_author_id_not_null
+        - addForeignKeyConstraint:
+            baseTableName: posts
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: posts_author_id__users_user_id_fk

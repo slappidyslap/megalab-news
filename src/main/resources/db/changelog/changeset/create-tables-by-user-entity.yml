@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-tables-by-user-entity
+      author: Eldiyar
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyNme: users_user_id_pk
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_picture_url
+                  type: varchar(2000)
+        - createIndex:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+            unique: true
+
+        - createTable:
+            tableName: favourite_posts_users
+            columns:
+              - column:
+                  name: post_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    references: posts (post_id)
+                    foreignKeyName: favourite_posts_users_post_id__posts_post_id_fk
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    references: users (user_id)
+                    foreignKeyName: favourite_posts_users_user_id__users_user_id_fk
