@@ -45,3 +45,4 @@ app:
   storage:
     folder-name: ${STORAGE_FOLDER_NAME:storage}
     post-image-folder-name: ${POST_IMAGE_FOLDER_NAME:post-image}
+    user-picture-folder-name: ${USER_PICTURE_FOLDER_NAME:user-picture}

@@ -21,25 +21,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.UUID;
-
-import static org.springframework.http.HttpStatus.*;
 
 @Service
 @Log4j2
@@ -53,10 +44,6 @@ public class SimplePostService implements PostService {
 
 	public static final String postListCacheName = "postList";
 	public static final String postItemCacheName = "postItem";
-	public static final Set<String> validImageFormats = Set.of(
-			MediaType.IMAGE_JPEG_VALUE,
-			MediaType.IMAGE_PNG_VALUE
-	);
 
 	@Value("${app.storage.folder-name}")
 	private String storageFolderName;
@@ -113,7 +100,7 @@ public class SimplePostService implements PostService {
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
-				getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
+				Utils.getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
 		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
 		postRepo.deleteById(postId);
 	}
@@ -126,8 +113,8 @@ public class SimplePostService implements PostService {
 	@CacheEvict(postListCacheName)
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
-			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
-			String postImageFilename = getLastPathSegmentOrNull(post.getImageUrl());
+			String imageFilename = Utils.getLastPathSegmentOrNull(dto.imageUrl());
+			String postImageFilename = Utils.getLastPathSegmentOrNull(post.getImageUrl());
 
 			postMapper.updatePostModelByPostDto(dto, post);
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
@@ -142,75 +129,24 @@ public class SimplePostService implements PostService {
 
 	@Override
 	public String uploadImage(MultipartFile image) {
-		if (!isValidImageFormat(image))
-			throw new ResponseStatusException(BAD_REQUEST);
-		String uniqueFilename = getUniqueFilename(image);
-		Path pathToSave = storage.resolve(uniqueFilename);
-		String imageUrl = buildUrlForImageByMethodName(PostController.class, "getPostImageByFilename", uniqueFilename);
-		try {
-			image.transferTo(pathToSave);
-		} catch (IOException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
-		}
-		return imageUrl;
+		return Utils.uploadFileAndGetUrlFromMethodName(
+				image,
+				storage,
+				PostController.class,
+				"getPostImageByFilename");
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public Resource getImageByFilename(String imageFilename) {
-		try {
-			var image = new UrlResource(storage.resolve(imageFilename).toUri());
-
-			if (!image.exists() || !image.isReadable()) {
-				throw new ResponseStatusException(NOT_FOUND);
-			}
-			return image;
-		} catch (MalformedURLException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
-		}
-	}
-
-	private String getUniqueFilename(MultipartFile image) {
-		return UUID.randomUUID() + "_" + image.getOriginalFilename();
-	}
-
-	private boolean isValidImageFormat(MultipartFile image) {
-		String imageFormat;
-		try {
-			imageFormat = Files.probeContentType(Path.of(image.getOriginalFilename()));
-		} catch (IOException e) {
-			log.warn("Произошла ошибка при получение формата изображения", e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
-		}
-		return validImageFormats.contains(imageFormat);
+		return Utils.getUploadedFileByFilenameInStorage(imageFilename, storage);
 	}
 
 	private void deleteImageInStorageIfExists(String imageFilename) {
-		if (imageFilename == null) return;
-		try {
-			boolean isDeleted = Files.deleteIfExists(storage.resolve(imageFilename));
-
-			if (isDeleted) log.debug("Изображение с названием {} удален", imageFilename);
-		} catch (IOException e) {
-			log.warn("Произошла ошибка при удалении изображения", e);
-		}
-	}
-
-
-	private String buildUrlForImageByMethodName(Class<?> controller, String methodName, String filename) {
-		try {
-			return MvcUriComponentsBuilder.fromMethodName(
-					controller,
-					methodName,
-					filename
-			).toUriString();
-		} catch (IllegalArgumentException e) {
-			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
-		}
-	}
-
-	private String getLastPathSegmentOrNull(String url) {
-		return url != null ? url.substring(url.lastIndexOf("/") + 1) : null;
+		Utils.deleteFileFromStorageIfExists(
+				imageFilename,
+				storage,
+				() -> log.debug("Изображение с названием {} удален", imageFilename),
+				exception -> log.warn("Произошла ошибка при удалении изображения", exception));
 	}
 }

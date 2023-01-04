@@ -1,23 +1,37 @@
 package kg.musabaev.megalabnews.util;
 
 import jakarta.annotation.PostConstruct;
+import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.exception.CommentNotFoundException;
 import kg.musabaev.megalabnews.exception.PostNotFoundException;
+import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
+import kg.musabaev.megalabnews.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 /*
 Если необходимо перенести в другой класс
@@ -30,14 +44,22 @@ public class Utils {
 
 	private final PostRepo _postRepo;
 	private final CommentRepo _commentRepo;
+	private final UserRepo _userRepo;
 
 	private static PostRepo postRepo;
 	private static CommentRepo commentRepo;
+	private static UserRepo userRepo;
+
+	public static final Set<String> validImageFormats = Set.of(
+			MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE
+	);
 
 	@PostConstruct
 	public void init() {
 		postRepo = _postRepo;
 		commentRepo = _commentRepo;
+		userRepo = _userRepo;
 	}
 
 	public static Post getPostReferenceByIdOrElseThrow(Long postId) {
@@ -60,12 +82,66 @@ public class Utils {
 			throw new CommentNotFoundException();
 	}
 
+	public static void assertUserExistsByIdOrElseThrow(Long userId) {
+		if (!userRepo.existsById(userId))
+			throw new UserNotFoundException();
+	}
+
 	public static void deleteCommentsRecursively(Long postId, List<Long> commentsId) {
 		if (commentsId.isEmpty()) return;
 		for (Long commentId : commentsId) {
 			deleteCommentsRecursively(
 					postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
 			commentRepo.deleteById(commentId);
+		}
+	}
+
+	public static Resource getUploadedFileByFilenameInStorage(String filename, Path storage) {
+		try {
+			var image = new UrlResource(storage.resolve(filename).toUri());
+
+			if (!image.exists() || !image.isReadable()) {
+				throw new ResponseStatusException(NOT_FOUND);
+			}
+			return image;
+		} catch (MalformedURLException e) {
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+		}
+	}
+
+	public static String uploadFileAndGetUrlFromMethodName(
+			MultipartFile file,
+			Path storage,
+			Class<?> controller,
+			String methodName) {
+		if (!isValidImageFormat(file)) throw new ResponseStatusException(BAD_REQUEST);
+		String uniqueFilename = getUniqueFilename(file);
+		Path pathToSave = storage.resolve(uniqueFilename);
+		String fileUrl = buildUrlForImageByMethodName(controller, methodName, uniqueFilename);
+		try {
+			file.transferTo(pathToSave);
+		} catch (IOException e) {
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+		}
+		return fileUrl;
+	}
+
+	public static String getLastPathSegmentOrNull(String url) {
+		return url != null ? url.substring(url.lastIndexOf("/") + 1) : null;
+	}
+
+	public static void deleteFileFromStorageIfExists(
+			String filename,
+			Path storage,
+			Runnable onCompleteAction,
+			Consumer<Exception> onErrorAction) {
+		if (filename == null) return;
+		try {
+			boolean isDeleted = Files.deleteIfExists(storage.resolve(filename));
+
+			if (isDeleted) onCompleteAction.run();
+		} catch (IOException e) {
+			onErrorAction.accept(e);
 		}
 	}
 
@@ -122,5 +198,36 @@ public class Utils {
 			return true;
 		}
 		return false;
+	}
+
+	private static boolean isValidImageFormat(MultipartFile image) {
+		String imageFormat;
+		try {
+			String originalFilename = image.getOriginalFilename();
+			if (originalFilename == null) throw new ResponseStatusException(BAD_REQUEST);
+
+			imageFormat = Files.probeContentType(Path.of(originalFilename));
+		} catch (IOException e) {
+			log.warn("Произошла ошибка при получение формата изображения", e);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+		}
+		return validImageFormats.contains(imageFormat);
+	}
+
+	private static String getUniqueFilename(MultipartFile image) {
+		return UUID.randomUUID() + "_" + image.getOriginalFilename();
+	}
+
+	private static String buildUrlForImageByMethodName(Class<?> controller, String methodName, String filename) {
+		try {
+			return MvcUriComponentsBuilder.fromMethodName(
+					controller,
+					methodName,
+					filename
+			).toUriString();
+		} catch (IllegalArgumentException e) {
+			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
+			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+		}
 	}
 }

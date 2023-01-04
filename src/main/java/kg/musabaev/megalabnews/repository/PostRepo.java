@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -25,4 +26,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 
 	@Query("SELECT p.imageUrl FROM Post p WHERE p.id = :postId")
 	String getPostImageUrlByPostId(@Param("postId") Long postId);
+
+	@Query("SELECT p.id FROM Post p WHERE p.author.id = :author_id")
+	List<Long> getAllPostsIdByAuthorId(@Param("author_id") Long authorId);
 }
