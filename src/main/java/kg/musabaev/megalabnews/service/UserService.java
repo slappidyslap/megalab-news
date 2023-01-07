@@ -3,8 +3,8 @@ package kg.musabaev.megalabnews.service;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
-import kg.musabaev.megalabnews.model.User;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
+import kg.musabaev.megalabnews.repository.projection.UserItemView;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
-	User getById(Long userId);
+	UserItemView getById(Long userId);
 
 	void addToFavouritePosts(Long userId, AddToFavouritePostsRequest dto);
 

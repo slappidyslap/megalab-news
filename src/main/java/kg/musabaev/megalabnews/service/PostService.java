@@ -2,7 +2,7 @@ package kg.musabaev.megalabnews.service;
 
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.projection.PostItemView;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -17,7 +17,7 @@ public interface PostService {
 
 	Page<PostListView> getAll(Pageable pageable, Set<String> tags);
 
-	Post getById(Long postId);
+	PostItemView getById(Long postId);
 
 	void deleteById(Long postId);
 

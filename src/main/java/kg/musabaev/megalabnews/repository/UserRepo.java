@@ -32,4 +32,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
 	@Query("SELECT u.userPictureUrl FROM User u WHERE u.id = :userId")
 	String findUserPictureByUserId(@Param("userId") Long userId);
+
+	Optional<UserItemView> findProjectedById(Long userId);
 }

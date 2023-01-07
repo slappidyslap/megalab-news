@@ -9,6 +9,7 @@ import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
+import kg.musabaev.megalabnews.repository.projection.PostItemView;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
 import kg.musabaev.megalabnews.util.Utils;
@@ -66,6 +67,7 @@ public class SimplePostService implements PostService {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		Post newPost = postMapper.toPostModel(newOrUpdatePostRequest);
+		// FIXME author of post must be not null
 
 		return postMapper.toPostDto(postRepo.save(newPost));
 	}
@@ -82,11 +84,8 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional(readOnly = true)
 	@Cacheable(postItemCacheName)
-	public Post getById(Long postId) {
-		return postRepo.findById(postId).map(post -> {
-			post.setTags(postRepo.findTagsByPostId(postId));
-			return post;
-		}).orElseThrow(() -> {
+	public PostItemView getById(Long postId) {
+		return postRepo.findProjectedById(postId).orElseThrow(() -> {
 			throw new PostNotFoundException();
 		});
 	}

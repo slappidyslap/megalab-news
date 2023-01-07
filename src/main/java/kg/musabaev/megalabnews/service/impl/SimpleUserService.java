@@ -56,8 +56,8 @@ public class SimpleUserService implements UserService {
 	}
 
 	@Override
-	public User getById(Long userId) {
-		return userRepo.findById(userId).orElseThrow(() -> {
+	public UserItemView getById(Long userId) {
+		return userRepo.findProjectedById(userId).orElseThrow(() -> {
 			throw new UserNotFoundException();
 		});
 	}

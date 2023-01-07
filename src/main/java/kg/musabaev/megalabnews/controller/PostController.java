@@ -3,7 +3,7 @@ package kg.musabaev.megalabnews.controller;
 import jakarta.validation.Valid;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
-import kg.musabaev.megalabnews.model.Post;
+import kg.musabaev.megalabnews.repository.projection.PostItemView;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class PostController {
 	}
 
 	@GetMapping("/{postId}")
-	ResponseEntity<Post> getPostById(@PathVariable Long postId) {
+	ResponseEntity<PostItemView> getPostById(@PathVariable Long postId) {
 		return ResponseEntity.ok(postService.getById(postId));
 	}
 
