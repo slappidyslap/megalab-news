@@ -1,6 +1,6 @@
 package kg.musabaev.megalabnews.dto;
 
-public record UpdateUserResponse (
+public record UpdateUserResponse(
 		Long id,
 		String name,
 		String surname,

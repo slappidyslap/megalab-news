@@ -6,11 +6,8 @@ import java.time.LocalDate;
 
 public interface CommentListView {
 	Long getId();
-
 	@JsonProperty("commentatorId")
 	Long getCommentator(); // todo spring security
-
 	String getContent();
-
 	LocalDate getCreatedDate();
 }

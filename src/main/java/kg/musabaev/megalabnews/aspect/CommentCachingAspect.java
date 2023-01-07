@@ -28,9 +28,9 @@ import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootComm
 @ConditionalOnBean(ConcurrentMapCacheManager.class)
 public class CommentCachingAspect {
 
-	private final CacheManager cacheManager;
-
 	public static final String CACHE_DELETED_BY_KEY = "Удалено значение у кэша {} по ключу {}";
+
+	private final CacheManager cacheManager;
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimpleCommentService)")
 	void targetPackage() {

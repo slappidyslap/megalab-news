@@ -15,11 +15,10 @@ public class RestApiExceptionHandler {
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 	}
 
-
 	/**
-	 PropertyReferenceException выбрасывается,
-	 когда мы Page параметризованный неким типом ({@link org.springframework.data.domain.Page})
-	 сортируем по имени поля, которого не существует в этом типе
+	 * PropertyReferenceException выбрасывается,
+	 * когда мы Page параметризованный неким типом ({@link org.springframework.data.domain.Page})
+	 * сортируем по имени поля, которого не существует в этом типе
 	 */
 	@ExceptionHandler(PropertyReferenceException.class)
 	void handlePropertyReferenceException(HttpServletResponse response) {

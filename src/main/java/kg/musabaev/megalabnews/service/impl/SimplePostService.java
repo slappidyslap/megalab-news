@@ -39,12 +39,12 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SimplePostService implements PostService {
 
+	public static final String postListCacheName = "postList";
+	public static final String postItemCacheName = "postItem";
+
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
 	private final CommentRepo commentRepo;
-
-	public static final String postListCacheName = "postList";
-	public static final String postItemCacheName = "postItem";
 
 	@Value("${app.storage.folder-name}")
 	private String storageFolderName;
@@ -66,10 +66,10 @@ public class SimplePostService implements PostService {
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
-		Post newPost = postMapper.toPostModel(newOrUpdatePostRequest);
+		Post newPost = postMapper.toModel(newOrUpdatePostRequest);
 		// FIXME author of post must be not null
 
-		return postMapper.toPostDto(postRepo.save(newPost));
+		return postMapper.toDto(postRepo.save(newPost));
 	}
 
 	@Override
@@ -115,12 +115,12 @@ public class SimplePostService implements PostService {
 			String imageFilename = Utils.getLastPathSegmentOrNull(dto.imageUrl());
 			String postImageFilename = Utils.getLastPathSegmentOrNull(post.getImageUrl());
 
-			postMapper.updatePostModelByPostDto(dto, post);
+			postMapper.update(dto, post);
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
 			if (postImageFilename != null && !imageFilename.equals(postImageFilename))
 				deleteImageInStorageIfExists(postImageFilename);
 
-			return postMapper.toPostDto(postRepo.save(post));
+			return postMapper.toDto(postRepo.save(post));
 		}).orElseThrow(() -> {
 			throw new PostNotFoundException();
 		});

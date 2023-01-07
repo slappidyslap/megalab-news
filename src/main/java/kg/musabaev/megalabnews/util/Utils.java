@@ -42,25 +42,18 @@ Refactor -> Move static member
 @RequiredArgsConstructor
 public class Utils {
 
-	private final PostRepo _postRepo;
-	private final CommentRepo _commentRepo;
-	private final UserRepo _userRepo;
-
-	private static PostRepo postRepo;
-	private static CommentRepo commentRepo;
-	private static UserRepo userRepo;
-
 	public static final Set<String> validImageFormats = Set.of(
 			MediaType.IMAGE_JPEG_VALUE,
 			MediaType.IMAGE_PNG_VALUE
 	);
 
-	@PostConstruct
-	public void init() {
-		postRepo = _postRepo;
-		commentRepo = _commentRepo;
-		userRepo = _userRepo;
-	}
+	private static PostRepo postRepo;
+	private static CommentRepo commentRepo;
+	private static UserRepo userRepo;
+
+	private final PostRepo _postRepo;
+	private final CommentRepo _commentRepo;
+	private final UserRepo _userRepo;
 
 	public static Post getPostReferenceByIdOrElseThrow(Long postId) {
 		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
@@ -146,12 +139,13 @@ public class Utils {
 	}
 
 	/**
-	 * Итерирует checks и когда находит true,
+	 * Итерируется по checks и когда находит true,
 	 * метод заканчивает свое выполнение
 	 * (какое-то ожидаемое исключение было сгенерировано),
 	 * иначе в логи напишет, что произошло другое исключение
+	 *
 	 * @param actualException действительное исключение
-	 * @param checks список результатов проверок, в котором произошло ли исключение или нет
+	 * @param checks          список результатов проверок, в которых произошло ли исключение или нет
 	 */
 	public static void iterateChainOfChecks(
 			Exception actualException,
@@ -229,5 +223,12 @@ public class Utils {
 			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
 			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
 		}
+	}
+
+	@PostConstruct
+	public void init() {
+		postRepo = _postRepo;
+		commentRepo = _commentRepo;
+		userRepo = _userRepo;
 	}
 }

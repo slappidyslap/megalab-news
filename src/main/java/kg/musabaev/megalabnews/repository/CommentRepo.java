@@ -23,8 +23,6 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
 
 	Optional<Comment> findByIdAndPostId(Long commentId, Long postId);
 
-	void deleteAllByParentId(Long parentId);
-
 	@Query("SELECT c.id FROM Comment c WHERE c.post.id = :postId AND c.parent IS NULL")
 	List<Long> getAllRootCommentId(@Param("postId") Long postId);
 

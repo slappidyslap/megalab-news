@@ -45,7 +45,8 @@ public class SimplePostServiceLoggingAspect {
 	static String ERROR_OCCURRED_WHILE_RECEIVING_IMAGE = "Произошла ошибка при получении изображения:";
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
-	void targetPackage() {}
+	void targetPackage() {
+	}
 
 
 	@AfterReturning(
@@ -132,7 +133,7 @@ public class SimplePostServiceLoggingAspect {
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
 		iterateChainOfChecks(e, List.of(
-				Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST,() -> {
+				Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST, () -> {
 					log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
 				}),
 				ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e))
@@ -152,7 +153,7 @@ public class SimplePostServiceLoggingAspect {
 			throwing = "e"
 	)
 	void afterThrowingMethodGetImageByFilename(JoinPoint jp, Exception e) {
-		iterateChainOfChecks(e,List.of(
+		iterateChainOfChecks(e, List.of(
 				ifNotFound(e, () -> log.debug(IMAGE_BY_FILENAME_NOT_FOUND, jp.getArgs()[0])),
 				ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_RECEIVING_IMAGE, e))
 		));

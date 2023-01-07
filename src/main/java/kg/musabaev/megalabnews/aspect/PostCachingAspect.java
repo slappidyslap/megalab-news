@@ -29,7 +29,8 @@ public class PostCachingAspect {
 	private final PostMapper mapper;
 
 	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
-	void targetPackage() {}
+	void targetPackage() {
+	}
 
 	@AfterReturning(
 			pointcut = "targetPackage() && execution(* update(..))",
@@ -43,7 +44,7 @@ public class PostCachingAspect {
 		Post cachedPost = cachePostItem.get(postId, Post.class);
 		if (Objects.isNull(cachedPost)) return;
 
-		mapper.updatePostModelByPostDto(responseDto, cachedPost);
+		mapper.update(responseDto, cachedPost);
 
 		cachePostItem.put(postId, cachedPost);
 
