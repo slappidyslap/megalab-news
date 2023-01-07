@@ -32,4 +32,6 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 
 	@EntityGraph(attributePaths = {"author"})
 	Optional<PostItemView> findProjectedById(Long postId);
+
+	Page<PostListView> findAllByAuthorId(Long authorId, Pageable pageable);
 }

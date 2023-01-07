@@ -24,10 +24,17 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	@Modifying
 	void deleteFromFavouritePosts(@Param("userId") Long userId, @Param("postId") Long postId);
 
-	@Query("SELECT u.createdPosts FROM User u WHERE u.id = :userId")
-	Page<PostListView> findCreatedPostsByUserId(@Param("userId") Long userId, Pageable pageable);
-
-	@Query("SELECT u.favouritePosts FROM User u WHERE u.id = :userId")
+	@Query(value = """
+			SELECT
+			    p.post_id AS id,
+			    p.title AS title,
+			    p.description AS description,
+			    p.created_date AS createdDate,
+			    p.image_url AS imageUrl
+			FROM posts p
+			JOIN favourite_posts_users fpu
+			ON fpu.post_id = p.post_id AND fpu.user_id = :userId
+			""", nativeQuery = true)
 	Page<PostListView> findFavouritePostsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	@Query("SELECT u.userPictureUrl FROM User u WHERE u.id = :userId")

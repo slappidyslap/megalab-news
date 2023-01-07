@@ -70,3 +70,5 @@ https://springdoc.org/v2/#getting-started
 https://dzone.com/articles/best-performance-practices-for-hibernate-5-and-spr-2
 
 https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html#getReferenceById(ID)
+
+https://stackoverflow.com/a/9843220/18215510

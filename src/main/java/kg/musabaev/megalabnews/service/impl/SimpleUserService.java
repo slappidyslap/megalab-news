@@ -96,7 +96,7 @@ public class SimpleUserService implements UserService {
 	public Page<PostListView> getAllCreatedPostsByUserId(Long userId, Pageable pageable) {
 		assertUserExistsByIdOrElseThrow(userId);
 
-		return userRepo.findCreatedPostsByUserId(userId, pageable);
+		return postRepo.findAllByAuthorId(userId, pageable);
 	}
 
 	@Override
