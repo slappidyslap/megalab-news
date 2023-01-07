@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: set-foreign-key-for-comment-author
+      author: Eldiyar
+      changes:
+        - renameColumn:
+            tableName: comments
+            oldColumnName: commentator_id
+            newColumnName: author_id
+
+        - addForeignKeyConstraint:
+            baseTableName: comments
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: comments_author_id__users_user_id_fk
+            referencesUniqueColumn: true
