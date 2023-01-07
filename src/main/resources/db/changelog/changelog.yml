@@ -23,3 +23,6 @@ databaseChangeLog:
   - include:
       file: changeset/set-primary-key-in-favourite-posts-users.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/set-foreign-key-for-comment-author.yml
+      relativeToChangelogFile: true

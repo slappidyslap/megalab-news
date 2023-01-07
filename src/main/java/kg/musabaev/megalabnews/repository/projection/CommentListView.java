@@ -1,13 +1,18 @@
 package kg.musabaev.megalabnews.repository.projection;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.LocalDate;
 
 public interface CommentListView {
 	Long getId();
-	@JsonProperty("commentatorId")
-	Long getCommentator(); // todo spring security
+	UserInfo getAuthor(); // todo spring security
 	String getContent();
 	LocalDate getCreatedDate();
+
+	interface UserInfo {
+		Long getId();
+		String getName();
+		String getSurname();
+		String getUsername();
+		String getUserPictureUrl();
+	}
 }

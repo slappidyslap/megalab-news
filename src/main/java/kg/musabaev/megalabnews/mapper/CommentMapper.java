@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-	@Mapping(target = "commentatorId", source = "commentator") // TODO переделать когда будет spring security
 	@Mapping(target = "parentId", source = "parent.id")
 	@Mapping(target = "postId", source = "post.id")
 	NewOrUpdateCommentResponse toDto(Comment comment);

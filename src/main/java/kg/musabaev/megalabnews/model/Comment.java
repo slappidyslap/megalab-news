@@ -39,15 +39,17 @@ public class Comment {
 	@OneToOne(
 			fetch = FetchType.LAZY,
 			cascade = {
-					CascadeType.MERGE, CascadeType.PERSIST,
-					CascadeType.PERSIST, CascadeType.REFRESH
-			})
+					CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	@JoinColumn(name = "parent_comment_id", updatable = false)
 	@Nullable
 	Comment parent;
 
-	@Column(name = "commentator_id", nullable = false, updatable = false)
-	Long commentator;
+	@OneToOne(
+			fetch = FetchType.LAZY,
+			cascade = {
+					CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	@JoinColumn(name = "author_id", nullable = false, updatable = false)
+	User author;
 
 	@Column(nullable = false, length = 2000)
 	String content;
