@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: modify-by-security-config
+      author: Eldiyar
+      changes:
+        - createTable:
+            tableName: users_authorities
+            columns:
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    references: users (user_id)
+                    foreignKeyName: users_authorities_user_id__users_user_id_fk
+              - column:
+                  name: authority
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: refresh_tokens
+            columns:
+              - column:
+                  name: refresh_token_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: refresh_tokens_refresh_token_id_pk
+              - column:
+                  name: expiry_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: owner_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    references: users (user_id)
+                    foreignKeyName: refresh_tokens_owner_id__users_user_id_fk

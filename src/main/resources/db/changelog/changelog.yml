@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: changeset/set-foreign-key-for-comment-author.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/modify-by-security-config.yml
+      relativeToChangelogFile: true

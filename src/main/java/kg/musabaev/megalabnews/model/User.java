@@ -2,13 +2,16 @@ package kg.musabaev.megalabnews.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import kg.musabaev.megalabnews.security.Authority;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -38,9 +41,17 @@ public class User {
 	@JsonIgnore
 	String password;
 
+	@ElementCollection(fetch = FetchType.LAZY)
+	@CollectionTable(
+			name = "users_authorities",
+			joinColumns = @JoinColumn(name = "user_id", nullable = false))
+	@Column(name = "authority", nullable = false)
+	@Enumerated(EnumType.STRING)
+	Set<Authority> authorities = new HashSet<>();
+
 	@ManyToMany(
 			fetch = FetchType.LAZY,
-			cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinTable(
 			name = "favourite_posts_users",
 			joinColumns = @JoinColumn(name = "user_id", nullable = false),

@@ -105,7 +105,7 @@ public class SimpleUserService implements UserService {
 		return userRepo.findById(userId).map(user -> {
 			userMapper.update(dto, user);
 
-			return userMapper.toDto(userRepo.save(user));
+			return userMapper.toUpdateUserDto(userRepo.save(user));
 		}).orElseThrow(() -> {
 			throw new UserNotFoundException();
 		});
