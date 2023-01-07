@@ -11,7 +11,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,7 +56,7 @@ public class UserController {
 		return ResponseEntity.ok(userService.getAllCreatedPostsByUserId(userId, pageable));
 	}
 
-	@PutMapping("/{userId}")
+	@PatchMapping("/{userId}")
 	ResponseEntity<UpdateUserResponse> updateUserById(
 			@PathVariable Long userId,
 			@RequestBody UpdateUserRequest dto) {
@@ -62,6 +64,7 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{userId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void deleteUserById(@PathVariable Long userId) {
 		userService.deleteById(userId);
 	}
@@ -73,6 +76,11 @@ public class UserController {
 
 	@GetMapping("/user-pictures/{filename}")
 	ResponseEntity<Resource> getUserPictureByFilename(@PathVariable String filename) {
-		return ResponseEntity.ok(userService.getUserPictureByFilename(filename));
+		Resource userPicture = userService.getUserPictureByFilename(filename);
+		return ResponseEntity
+				.ok()
+				.contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + userPicture.getFilename() + "\"")
+				.body(userPicture);
 	}
 }

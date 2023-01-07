@@ -135,7 +135,7 @@ public class SimpleUserService implements UserService {
 		for (Long postId : postRepo.findAllPostsIdByAuthorId(userId))
 			postService.deleteById(postId);
 
-		deleteImageInStorageIfExists(userRepo.findUserPictureByUserId(userId));
+		deleteImageInStorageIfExists(Utils.getLastPathSegmentOrNull(userRepo.findUserPictureByUserId(userId)));
 		userRepo.deleteById(userId);
 	}
 
