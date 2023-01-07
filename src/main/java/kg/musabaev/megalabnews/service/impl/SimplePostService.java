@@ -100,7 +100,7 @@ public class SimplePostService implements PostService {
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
-				Utils.getLastPathSegmentOrNull(postRepo.getPostImageUrlByPostId(postId)));
+				Utils.getLastPathSegmentOrNull(postRepo.findPostImageUrlByPostId(postId)));
 		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
 		postRepo.deleteById(postId);
 	}
