@@ -16,6 +16,8 @@ public interface UserService {
 
 	void addToFavouritePosts(Long userId, AddToFavouritePostsRequest dto);
 
+	void deleteFromFavouritePosts(Long userId, Long postId);
+
 	Page<PostListView> getAllFavouritePostsByUserId(Long userId, Pageable pageable);
 
 	Page<PostListView> getAllCreatedPostsByUserId(Long userId, Pageable pageable);

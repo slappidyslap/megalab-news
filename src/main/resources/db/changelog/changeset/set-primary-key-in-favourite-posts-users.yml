@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: set-primary-key-in-favourite-posts-users
+      author: Eldiyar
+      changes:
+        - addPrimaryKey:
+            tableName: favourite_posts_users
+            columnNames: post_id, user_id
+            constraintName: favourite_posts_users_pk

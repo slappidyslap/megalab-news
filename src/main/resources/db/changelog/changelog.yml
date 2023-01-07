@@ -20,3 +20,6 @@ databaseChangeLog:
   - include:
       file: changeset/add-column-author-in-posts-table.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/set-primary-key-in-favourite-posts-users.yml
+      relativeToChangelogFile: true

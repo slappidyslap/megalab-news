@@ -3,14 +3,15 @@ package kg.musabaev.megalabnews.controller;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
-import kg.musabaev.megalabnews.model.User;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
+import kg.musabaev.megalabnews.repository.projection.UserItemView;
 import kg.musabaev.megalabnews.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,12 @@ public class UserController {
 	@PostMapping("/{userId}/favourite-posts") // FIXME pass userId via jwt
 	void addPostToUserFavouritePosts(@PathVariable Long userId, @RequestBody AddToFavouritePostsRequest dto) {
 		userService.addToFavouritePosts(userId, dto);
+	}
+
+	@DeleteMapping("/{userId}/favourite-posts/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	void deletePostFromUserFavouritePosts(@PathVariable Long userId, @PathVariable Long postId) {
+		userService.deleteFromFavouritePosts(userId, postId);
 	}
 
 	@GetMapping("/{userId}/favourite-posts")

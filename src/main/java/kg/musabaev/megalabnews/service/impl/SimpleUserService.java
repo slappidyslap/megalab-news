@@ -7,10 +7,10 @@ import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.mapper.UserMapper;
-import kg.musabaev.megalabnews.model.User;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
+import kg.musabaev.megalabnews.repository.projection.UserItemView;
 import kg.musabaev.megalabnews.service.PostService;
 import kg.musabaev.megalabnews.service.UserService;
 import kg.musabaev.megalabnews.util.Utils;
@@ -19,14 +19,18 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 
+import static kg.musabaev.megalabnews.util.Utils.assertPostExistsByIdOrElseThrow;
 import static kg.musabaev.megalabnews.util.Utils.assertUserExistsByIdOrElseThrow;
 
 @Service
@@ -62,9 +66,21 @@ public class SimpleUserService implements UserService {
 	@Transactional
 	public void addToFavouritePosts(Long userId, AddToFavouritePostsRequest dto) {
 		assertUserExistsByIdOrElseThrow(userId);
-		Utils.assertPostExistsByIdOrElseThrow(dto.postId());
+		assertPostExistsByIdOrElseThrow(dto.postId());
 
-		userRepo.insertIntoFavouritePosts(userId, dto.postId());
+		try {
+			userRepo.insertIntoFavouritePosts(userId, dto.postId());
+		} catch (DataIntegrityViolationException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT);
+		}
+	}
+
+	@Override
+	@Transactional
+	public void deleteFromFavouritePosts(Long userId, Long postId) {
+		assertUserExistsByIdOrElseThrow(userId);
+
+		userRepo.deleteFromFavouritePosts(userId, postId);
 	}
 
 	@Override
