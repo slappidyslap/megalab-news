@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -40,6 +41,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	UserMapper userMapper;
 
 	@Override
+	@Transactional(readOnly = true)
 	public AuthenticateOrRefreshResponse authenticate(AuthenticateRequest request) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.username(), request.password()));
@@ -50,6 +52,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	}
 
 	@Override
+	@Transactional
 	public AuthenticateOrRefreshResponse refresh(UpdateTokenRequest request) {
 		RefreshToken refreshToken = refreshTokenRepo.findByToken(request.refreshToken()).orElseThrow(() -> {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -63,6 +66,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	}
 
 	@Override
+	@Transactional
 	public RegisterUserResponse register(RegisterUserRequest request) {
 		if (userRepo.existsByUsername(request.username()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
