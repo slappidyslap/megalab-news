@@ -23,12 +23,11 @@ import java.util.List;
 import static kg.musabaev.megalabnews.util.Utils.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-// Это бы хорошо протестировать. Потому что это культурно!
 @Component
 @Aspect
 @Log4j2
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class SimplePostServiceLoggingAspect {
+public class PostServiceLoggingAspect {
 
 	static String NEW_POST_SAVED = "Новая публикация: {}";
 	static String FILE_NOT_VALID_IMAGE_FORMAT = "Изображение не валидного формата";
@@ -44,7 +43,7 @@ public class SimplePostServiceLoggingAspect {
 	static String IMAGE_BY_FILENAME_NOT_FOUND = "Изображение с названием {} не найден";
 	static String ERROR_OCCURRED_WHILE_RECEIVING_IMAGE = "Произошла ошибка при получении изображения:";
 
-	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimplePostService)")
+	@Pointcut("within(kg.musabaev.megalabnews.service.PostService+)")
 	void targetPackage() {
 	}
 

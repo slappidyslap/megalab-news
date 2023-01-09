@@ -22,7 +22,7 @@ import static kg.musabaev.megalabnews.util.Utils.*;
 @Aspect
 @Log4j2
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class SimpleCommentServiceLoggingAspect {
+public class CommentServiceLoggingAspect {
 
 	static String COMMENT_BY_ID_DELETED = "Комментарий с id {} удален";
 	static String NEW_COMMENT_SAVED = "Новый комментарий: {}";
@@ -32,7 +32,7 @@ public class SimpleCommentServiceLoggingAspect {
 	static String POST_BY_ID_NOT_FOUND = "Публикация с id {} не найден";
 	static String COMMENT_BY_ID_NOT_FOUND = "Комментарий с id {} не найден";
 
-	@Pointcut("within(kg.musabaev.megalabnews.service.impl.SimpleCommentService)")
+	@Pointcut("within(kg.musabaev.megalabnews.service.CommentService+)")
 	void targetPackage() {
 	}
 

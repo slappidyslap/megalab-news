@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public interface CommentListView {
 	Long getId();
-	UserInfo getAuthor(); // todo spring security
+	UserInfo getAuthor();
 	String getContent();
 	LocalDate getCreatedDate();
 
