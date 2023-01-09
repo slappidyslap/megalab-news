@@ -1,4 +1,6 @@
 package kg.musabaev.megalabnews.dto;
 
-public record AddToFavouritePostsRequest(Long postId) {
+import jakarta.validation.constraints.Positive;
+
+public record AddToFavouritePostsRequest(@Positive Long postId) {
 }
