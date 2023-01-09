@@ -29,3 +29,9 @@ databaseChangeLog:
   - include:
       file: changeset/modify-by-security-config.yml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/add-auto-increment-for-refresh-token-id.yml
+      relativeToChangelogFile: true
+  - include:
+      file: changeset/set-primary-key-in-users-authorities.yml
+      relativeToChangelogFile: true

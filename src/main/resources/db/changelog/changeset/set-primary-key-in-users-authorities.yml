@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: set-primary-key-in-users-authorities
+      author: Eldiyar
+      changes:
+        - addPrimaryKey:
+            tableName: users_authorities
+            columnNames: user_id, authority
+            constraintName: users_authorities_user_id_authority_pk

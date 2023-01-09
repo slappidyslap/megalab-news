@@ -41,12 +41,13 @@ public class User {
 	@JsonIgnore
 	String password;
 
-	@ElementCollection(fetch = FetchType.LAZY)
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(
 			name = "users_authorities",
 			joinColumns = @JoinColumn(name = "user_id", nullable = false))
 	@Column(name = "authority", nullable = false)
 	@Enumerated(EnumType.STRING)
+	@Fetch(FetchMode.SUBSELECT)
 	Set<Authority> authorities = new HashSet<>();
 
 	@ManyToMany(

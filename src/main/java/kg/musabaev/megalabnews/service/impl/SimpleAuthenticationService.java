@@ -41,7 +41,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	UserMapper userMapper;
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public AuthenticateOrRefreshResponse authenticate(AuthenticateRequest request) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.username(), request.password()));

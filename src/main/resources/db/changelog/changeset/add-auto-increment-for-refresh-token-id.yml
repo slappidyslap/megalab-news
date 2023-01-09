@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-auto-increment-for-refresh-token-id
+      author: Eldiyar
+      changes:
+        - addAutoIncrement:
+            tableName: refresh_tokens
+            columnName: refresh_token_id
+            columnDataType: bigint

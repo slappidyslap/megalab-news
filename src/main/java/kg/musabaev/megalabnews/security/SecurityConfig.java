@@ -1,5 +1,6 @@
 package kg.musabaev.megalabnews.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import kg.musabaev.megalabnews.repository.UserRepo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,10 +35,14 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				/*.exceptionHandling(registry -> {
+				.authorizeHttpRequests()
+				.requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/register").permitAll()
+				.anyRequest().authenticated()
+				.and()
+				.exceptionHandling(registry -> {
 					registry.authenticationEntryPoint((req, res, e) -> res.setStatus(HttpServletResponse.SC_UNAUTHORIZED));
-					registry.accessDeniedHandler((req, res, e) -> res.setStatus(HttpServletResponse.SC_FORBIDDEN));
-				})*/
+//					registry.accessDeniedHandler((req, res, e) -> res.setStatus(HttpServletResponse.SC_FORBIDDEN));
+				})
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
