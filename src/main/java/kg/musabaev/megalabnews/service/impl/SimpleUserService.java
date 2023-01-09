@@ -8,10 +8,10 @@ import kg.musabaev.megalabnews.dto.UpdateUserResponse;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.mapper.UserMapper;
 import kg.musabaev.megalabnews.repository.PostRepo;
+import kg.musabaev.megalabnews.repository.RefreshTokenRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.repository.projection.UserItemView;
-import kg.musabaev.megalabnews.service.PostService;
 import kg.musabaev.megalabnews.service.UserService;
 import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class SimpleUserService implements UserService {
 	private final UserRepo userRepo;
 	private final UserMapper userMapper;
 	private final PostRepo postRepo;
-	private final PostService postService;
+	private final RefreshTokenRepo refreshTokenRepo;
 
 	@Value("${app.storage.folder-name}")
 	private String storageFolderName;
@@ -132,10 +132,10 @@ public class SimpleUserService implements UserService {
 	public void deleteById(Long userId) {
 		assertUserExistsByIdOrElseThrow(userId);
 
-		for (Long postId : postRepo.findAllPostsIdByAuthorId(userId))
-			postService.deleteById(postId);
-
+		postRepo.findAllPostsIdByAuthorId(userId).forEach(postRepo::deleteById);
 		deleteImageInStorageIfExists(Utils.getLastPathSegmentOrNull(userRepo.findUserPictureByUserId(userId)));
+		refreshTokenRepo.deleteByOwnerId(userId);
+
 		userRepo.deleteById(userId);
 	}
 

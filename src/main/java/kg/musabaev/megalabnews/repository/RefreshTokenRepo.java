@@ -14,4 +14,6 @@ public interface RefreshTokenRepo extends JpaRepository<RefreshToken, Long> {
 
 	@EntityGraph(attributePaths = "owner")
 	Optional<RefreshToken> findByToken(String token);
+
+	void deleteByOwnerId(Long ownerId);
 }

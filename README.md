@@ -74,3 +74,5 @@ https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data
 https://stackoverflow.com/a/9843220/18215510
 
 https://www.youtube.com/watch?v=vQldMjSJ6-w&list=PLvTBThJr861y60LQrUGpJNPu3Nt2EeQsP
+
+https://stackoverflow.com/questions/43217424/storing-oauth-2-0-token-in-cache-and-validating-next-request-by-compare-it
