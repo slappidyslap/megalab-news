@@ -42,7 +42,7 @@ public class SimpleCommentService implements CommentService {
 
 		Comment newComment = commentMapper.toModel(dto);
 		newComment.setParent(parentComment);
-		newComment.setPost(post); // FIXME переделать когда будет spring security
+		newComment.setPost(post);
 
 		return commentMapper.toDto(commentRepo.save(newComment));
 	}

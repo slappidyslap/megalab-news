@@ -67,7 +67,6 @@ public class SimplePostService implements PostService {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		Post newPost = postMapper.toModel(newOrUpdatePostRequest);
-		// FIXME author of post must be not null
 
 		return postMapper.toDto(postRepo.save(newPost));
 	}

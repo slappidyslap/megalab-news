@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.Nullable;
@@ -36,12 +37,11 @@ public class Post {
 	@Column(nullable = false, length = 500)
 	String description = "";
 
+	@CreatedBy
 	@ManyToOne(
 			fetch = FetchType.LAZY,
 			cascade = {
-					CascadeType.MERGE, CascadeType.PERSIST,
-					CascadeType.PERSIST, CascadeType.REFRESH
-			},
+					CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
 			optional = false)
 	@JoinColumn(name = "author_id", updatable = false, nullable = false)
 	User author;
