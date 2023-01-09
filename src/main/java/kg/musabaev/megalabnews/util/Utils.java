@@ -166,8 +166,20 @@ public class Utils {
 		return ifExceptionEqualsOrElseLog(e, PostNotFoundException.class, runnable);
 	}
 
+	public static boolean ifUserNotFound(Exception e, Runnable runnable) {
+		return ifExceptionEqualsOrElseLog(e, UserNotFoundException.class, runnable);
+	}
+
 	public static boolean ifInternalServerError(Exception e, Runnable runnable) {
 		return ifResponseStatusExceptionWithStatusOrElseLog(e, INTERNAL_SERVER_ERROR, runnable);
+	}
+
+	public static boolean ifConflict(Exception e, Runnable runnable) {
+		return ifResponseStatusExceptionWithStatusOrElseLog(e, CONFLICT, runnable);
+	}
+
+	public static boolean ifBadRequest(Exception e, Runnable runnable) {
+		return ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST, runnable);
 	}
 
 	public static boolean ifNotFound(Exception e, Runnable runnable) {
