@@ -102,6 +102,8 @@ public class SimpleUserService implements UserService {
 	@Override
 	@Transactional
 	public UpdateUserResponse update(Long userId, UpdateUserRequest dto) {
+		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusException(HttpStatus.CONFLICT);
+
 		return userRepo.findById(userId).map(user -> {
 			userMapper.update(dto, user);
 
