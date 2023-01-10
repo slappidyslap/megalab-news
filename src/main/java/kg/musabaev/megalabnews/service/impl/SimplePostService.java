@@ -41,6 +41,7 @@ public class SimplePostService implements PostService {
 
 	public static final String postListCacheName = "postList";
 	public static final String postItemCacheName = "postItem";
+	public static final String postImageCacheName = "postImage";
 
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
@@ -61,8 +62,7 @@ public class SimplePostService implements PostService {
 	@Transactional
 	@Caching(evict = {
 			@CacheEvict(postListCacheName),
-			@CacheEvict(value = postItemCacheName, key = "#result.id()")
-	})
+			@CacheEvict(value = postItemCacheName, key = "#result.id()")})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
@@ -93,8 +93,8 @@ public class SimplePostService implements PostService {
 	@Transactional
 	@Caching(evict = {
 			@CacheEvict(postItemCacheName),
-			@CacheEvict(postListCacheName),
-	})
+			@CacheEvict(cacheNames = postListCacheName, allEntries = true),
+			@CacheEvict(cacheNames = postImageCacheName, allEntries = true)})
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
@@ -108,7 +108,9 @@ public class SimplePostService implements PostService {
 	 */
 	@Override
 	@Transactional
-	@CacheEvict(postListCacheName)
+	@Caching(evict = {
+			@CacheEvict(cacheNames = postListCacheName, allEntries = true),
+			@CacheEvict(cacheNames = postImageCacheName, allEntries = true)})
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
 			String imageFilename = Utils.getLastPathSegmentOrNull(dto.imageUrl());
@@ -136,6 +138,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(postImageCacheName)
 	public Resource getImageByFilename(String imageFilename) {
 		return Utils.getUploadedFileByFilenameInStorage(imageFilename, storage);
 	}
