@@ -34,5 +34,5 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
 			FROM comments c
 			LEFT JOIN users u ON c.author_id = u.user_id
 			WHERE c.post_id = :postId AND c.comment_id = :commentId""", nativeQuery = true)
-	String findAuthorUsernameByPostIdAndCommentId(@Param("postId") Long postId, @Param("parentId") Long commentId);
+	String findAuthorUsernameByPostIdAndCommentId(@Param("postId") Long postId, @Param("commentId") Long commentId);
 }
