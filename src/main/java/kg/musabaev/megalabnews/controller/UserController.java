@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,13 +32,15 @@ public class UserController {
 		return ResponseEntity.ok(userService.getById(userId));
 	}
 
-	@PostMapping("/{userId}/favourite-posts") // FIXME pass userId via jwt
+	@PostMapping("/{userId}/favourite-posts")
+	@PreAuthorize("hasAuthority('WRITE_USER')")
 	void addPostToUserFavouritePosts(@PathVariable Long userId, @RequestBody AddToFavouritePostsRequest dto) {
 		userService.addToFavouritePosts(userId, dto);
 	}
 
 	@DeleteMapping("/{userId}/favourite-posts/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('WRITE_USER')")
 	void deletePostFromUserFavouritePosts(@PathVariable Long userId, @PathVariable Long postId) {
 		userService.deleteFromFavouritePosts(userId, postId);
 	}
@@ -57,6 +60,7 @@ public class UserController {
 	}
 
 	@PatchMapping("/{userId}")
+	@PreAuthorize("hasAuthority('WRITE_USER')")
 	ResponseEntity<UpdateUserResponse> updateUserById(
 			@PathVariable Long userId,
 			@RequestBody UpdateUserRequest dto) {
@@ -65,6 +69,7 @@ public class UserController {
 
 	@DeleteMapping("/{userId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('WRITE_USER')")
 	void deleteUserById(@PathVariable Long userId) {
 		userService.deleteById(userId);
 	}

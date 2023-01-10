@@ -49,4 +49,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 	@Query(value = "DELETE FROM favourite_posts_users WHERE post_id = :postId " , nativeQuery = true)
 	@Modifying
 	void deletePostsFromUserFavouritePosts(@Param("postId") Long postId);
+
+	@Query(value = "SELECT username FROM users WHERE user_id = :userId", nativeQuery = true)
+	String findUsernameByUserId(@Param("userId") Long userId);
 }

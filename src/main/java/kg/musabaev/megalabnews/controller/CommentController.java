@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping("/{postId}/comments")
+	@PreAuthorize("hasAuthority('WRITE_COMMENT')")
 	ResponseEntity<NewOrUpdateCommentResponse> saveComment(
 			@PathVariable Long postId,
 			@Valid @RequestBody NewCommentRequest dto) {
@@ -47,6 +49,7 @@ public class CommentController {
 	}
 
 	@PatchMapping("/{postId}/comments/{commentId}")
+	@PreAuthorize("hasAuthority('WRITE_COMMENT')")
 	ResponseEntity<NewOrUpdateCommentResponse> updateCommentById(
 			@PathVariable Long postId,
 			@PathVariable Long commentId,
@@ -55,6 +58,7 @@ public class CommentController {
 	}
 
 	@DeleteMapping("/{postId}/comments/{commentId}")
+	@PreAuthorize("hasAuthority('WRITE_COMMENT')")
 	void deleteCommentById(
 			@PathVariable Long postId,
 			@PathVariable Long commentId) {

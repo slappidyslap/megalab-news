@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -29,7 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableMethodSecurity
+@EnableWebSecurity
 public class SecurityConfig {
 
 	private final UserRepo userRepo;
@@ -45,7 +47,7 @@ public class SecurityConfig {
 		return http
 				.authorizeHttpRequests()
 				.requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/register").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll() // FIXME
+				.requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
 				.anyRequest().authenticated()

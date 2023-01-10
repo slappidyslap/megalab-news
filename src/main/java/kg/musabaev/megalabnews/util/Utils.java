@@ -17,6 +17,8 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -136,6 +138,14 @@ public class Utils {
 		} catch (IOException e) {
 			onErrorAction.accept(e);
 		}
+	}
+
+	public static boolean isAuthenticatedUser(String actualUserUsername) {
+		UserDetails authenticatedPrincipal = (UserDetails) SecurityContextHolder
+				.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		return authenticatedPrincipal.getUsername().equals(actualUserUsername);
 	}
 
 	/**

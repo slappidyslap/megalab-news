@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
+	@PreAuthorize("hasAuthority('WRITE_POST')")
 	ResponseEntity<NewOrUpdatePostResponse> savePost(@Valid @RequestBody NewOrUpdatePostRequest dto) {
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
@@ -48,12 +50,14 @@ public class PostController {
 	}
 
 	@DeleteMapping("/{postId}")
+	@PreAuthorize("hasAuthority('WRITE_POST')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void deletePostById(@PathVariable Long postId) {
 		postService.deleteById(postId);
 	}
 
 	@PutMapping("/{postId}")
+	@PreAuthorize("hasAuthority('WRITE_POST')")
 	NewOrUpdatePostResponse updatePostById(
 			@PathVariable Long postId,
 			@Valid @RequestBody NewOrUpdatePostRequest dto) {
@@ -61,6 +65,7 @@ public class PostController {
 	}
 
 	@PostMapping("/images")
+	@PreAuthorize("hasAuthority('WRITE_POST')")
 	ResponseEntity<String> uploadImageForPost(@RequestPart(name = "image") MultipartFile image) {
 		return ResponseEntity.ok(postService.uploadImage(image));
 	}

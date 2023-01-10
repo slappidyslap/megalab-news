@@ -17,8 +17,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import static kg.musabaev.megalabnews.util.Utils.isAuthenticatedUser;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +76,9 @@ public class SimpleCommentService implements CommentService {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 
 		Comment updatedComment = commentRepo.findByIdAndPostId(commentId, postId).map(comment -> {
+			if (!isAuthenticatedUser(comment.getAuthor().getUsername()))
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+
 			comment.setContent(dto.content());
 
 			return commentRepo.save(comment);
@@ -86,6 +93,9 @@ public class SimpleCommentService implements CommentService {
 	public void deleteById(Long postId, Long commentId) {
 		Utils.assertCommentExistsByIdOrElseThrow(postId, commentId);
 		Utils.deleteCommentsRecursively(postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
+		if (!isAuthenticatedUser(commentRepo.findAuthorUsernameByPostIdAndCommentId(postId, commentId)))
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+
 		commentRepo.deleteById(commentId);
 	}
 }

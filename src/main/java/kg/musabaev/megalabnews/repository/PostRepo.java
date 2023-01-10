@@ -34,4 +34,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 	Optional<PostItemView> findProjectedById(Long postId);
 
 	Page<PostListView> findAllByAuthorId(Long authorId, Pageable pageable);
+
+	@Query(value = "SELECT u.username FROM posts p LEFT JOIN users u ON p.author_id = u.user_id WHERE p.post_id = :postId", nativeQuery = true)
+	String findAuthorUsernameByPostId(@Param("postId") Long postId);
 }

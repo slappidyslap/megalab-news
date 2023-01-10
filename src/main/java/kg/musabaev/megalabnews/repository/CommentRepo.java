@@ -28,4 +28,11 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
 
 	@Query("SELECT c.id FROM Comment c WHERE c.parent.id = :parentId AND c.post.id = :postId")
 	List<Long> getAllChildCommentIdByParentId(@Param("postId") Long postId, @Param("parentId") Long parentId);
+
+	@Query(value = """
+			SELECT u.username
+			FROM comments c
+			LEFT JOIN users u ON c.author_id = u.user_id
+			WHERE c.post_id = :postId AND c.comment_id = :commentId""", nativeQuery = true)
+	String findAuthorUsernameByPostIdAndCommentId(@Param("postId") Long postId, @Param("parentId") Long commentId);
 }
