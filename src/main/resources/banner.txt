@@ -1,0 +1,6 @@
+${AnsiColor.MAGENTA}  __  __ _____ ____    _    _        _    ____  ${AnsiColor.DEFAULT}  _   _ _______        ______
+${AnsiColor.MAGENTA} |  \/  | ____/ ___|  / \  | |      / \  | __ ) ${AnsiColor.DEFAULT} | \ | | ____\ \      / / ___|
+${AnsiColor.MAGENTA} | |\/| |  _|| |  _  / _ \ | |     / _ \ |  _ \ ${AnsiColor.DEFAULT} |  \| |  _|  \ \ /\ / /\___ \
+${AnsiColor.MAGENTA} | |  | | |__| |_| |/ ___ \| |___ / ___ \| |_) |${AnsiColor.DEFAULT} | |\  | |___  \ V  V /  ___) |
+${AnsiColor.MAGENTA} |_|  |_|_____\____/_/   \_\_____/_/   \_\____/ ${AnsiColor.DEFAULT} |_| \_|_____|  \_/\_/  |____/
+${AnsiColor.BRIGHT_GREEN}Powered by Spring Boot ${spring-boot.version}${AnsiColor.DEFAULT}
