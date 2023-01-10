@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentMap;
 
-import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.childCommentsCacheName;
-import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootCommentsCacheName;
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.CHILD_COMMENTS_CACHE_NAME;
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.ROOT_COMMENTS_CACHE_NAME;
 
 @Component
 @Aspect
@@ -56,37 +56,37 @@ public class CommentCachingAspect {
 	}
 
 	private void deleteRootCommentsCacheByPostId(Long postId) {
-		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(rootCommentsCacheName);
+		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(ROOT_COMMENTS_CACHE_NAME);
 
 		store.entrySet().removeIf(entry -> {
 			var pair = (Pair<Long, Pageable>) entry.getKey();
 
 			boolean isEquals = pair.getKey().equals(postId);
-			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, rootCommentsCacheName, pair);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, ROOT_COMMENTS_CACHE_NAME, pair);
 			return isEquals;
 		});
 	}
 
 	private void deleteChildCommentsCacheByPostIdAndParentCommentId(Long postId, Long parentId) {
-		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(childCommentsCacheName);
+		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(CHILD_COMMENTS_CACHE_NAME);
 
 		store.entrySet().removeIf(entry -> {
 			var triple = (Triple<Long, Long, Pageable>) entry.getKey();
 
 			boolean isEquals = triple.getLeft().equals(postId) && triple.getMiddle().equals(parentId);
-			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, childCommentsCacheName, triple);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, CHILD_COMMENTS_CACHE_NAME, triple);
 			return isEquals;
 		});
 	}
 
 	private void deleteChildCommentsCacheByPostIdAndAnyCommentId(Long postId) {
-		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(childCommentsCacheName);
+		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(CHILD_COMMENTS_CACHE_NAME);
 
 		store.entrySet().removeIf(entry -> {
 			var triple = (Triple<Long, Long, Pageable>) entry.getKey();
 
 			boolean isEquals = triple.getLeft().equals(postId);
-			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, childCommentsCacheName, triple);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, CHILD_COMMENTS_CACHE_NAME, triple);
 			return isEquals;
 		});
 	}

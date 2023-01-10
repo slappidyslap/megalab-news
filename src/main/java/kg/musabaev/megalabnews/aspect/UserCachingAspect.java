@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 
-import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootCommentsCacheName;
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.ROOT_COMMENTS_CACHE_NAME;
 
 @Component
 @Aspect
@@ -47,7 +47,7 @@ public class UserCachingAspect {
 			Pair<Long, Pageable> key = (Pair<Long, Pageable>) entry.getKey();
 
 			boolean isEquals = key.getKey().equals(jp.getArgs()[0]);
-			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, rootCommentsCacheName, key);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, ROOT_COMMENTS_CACHE_NAME, key);
 			return isEquals;
 		};
 

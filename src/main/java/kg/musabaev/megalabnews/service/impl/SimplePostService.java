@@ -43,9 +43,9 @@ import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_FAVOUR
 @RequiredArgsConstructor
 public class SimplePostService implements PostService {
 
-	public static final String postListCacheName = "postList";
-	public static final String postItemCacheName = "postItem";
-	public static final String postImageCacheName = "postImage";
+	public static final String POST_LIST_CACHE_NAME = "postList";
+	public static final String POST_ITEM_CACHE_NAME = "postItem";
+	public static final String POST_IMAGE_CACHE_NAME = "postImage";
 
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
@@ -66,8 +66,8 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	@Caching(evict = {
-			@CacheEvict(postListCacheName), //FIXME
-			@CacheEvict(value = postItemCacheName, key = "#result.id()")})
+			@CacheEvict(POST_LIST_CACHE_NAME), //FIXME
+			@CacheEvict(value = POST_ITEM_CACHE_NAME, key = "#result.id()")})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
@@ -78,7 +78,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(postListCacheName)
+	@Cacheable(POST_LIST_CACHE_NAME)
 	public Page<PostListView> getAll(Pageable pageable, Set<String> tags) {
 		if (tags == null || tags.isEmpty())
 			return postRepo.findAllProjectedBy(pageable);
@@ -87,7 +87,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(postItemCacheName)
+	@Cacheable(POST_ITEM_CACHE_NAME)
 	public PostItemView getById(Long postId) {
 		return postRepo.findProjectedById(postId).orElseThrow(() -> {
 			throw new PostNotFoundException();
@@ -97,9 +97,9 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	@Caching(evict = {
-			@CacheEvict(postItemCacheName),
-			@CacheEvict(cacheNames = postListCacheName, allEntries = true),
-			@CacheEvict(cacheNames = postImageCacheName, allEntries = true),
+			@CacheEvict(POST_ITEM_CACHE_NAME),
+			@CacheEvict(cacheNames = POST_LIST_CACHE_NAME, allEntries = true),
+			@CacheEvict(cacheNames = POST_IMAGE_CACHE_NAME, allEntries = true),
 			@CacheEvict(cacheNames = USER_CREATED_POSTS_CACHE_NAME, allEntries = true), // FIXME
 			@CacheEvict(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long postId) {
@@ -118,8 +118,8 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	@Caching(evict = {
-			@CacheEvict(cacheNames = postListCacheName, allEntries = true),
-			@CacheEvict(cacheNames = postImageCacheName, allEntries = true)})
+			@CacheEvict(cacheNames = POST_LIST_CACHE_NAME, allEntries = true),
+			@CacheEvict(cacheNames = POST_IMAGE_CACHE_NAME, allEntries = true)})
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
 			String imageFilename = Utils.getLastPathSegmentOrNull(dto.imageUrl());
@@ -147,7 +147,7 @@ public class SimplePostService implements PostService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(postImageCacheName)
+	@Cacheable(POST_IMAGE_CACHE_NAME)
 	public Resource getImageByFilename(String imageFilename) {
 		return Utils.getUploadedFileByFilenameInStorage(imageFilename, storage);
 	}

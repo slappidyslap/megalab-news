@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 
 import static kg.musabaev.megalabnews.aspect.CommentCachingAspect.CACHE_DELETED_BY_KEY;
-import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootCommentsCacheName;
+import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.ROOT_COMMENTS_CACHE_NAME;
 
 @Component
 @Aspect
@@ -43,7 +43,7 @@ public class PostCachingAspect {
 			returning = "responseDto")
 	void updateCachePostItem(JoinPoint joinPoint, NewOrUpdatePostResponse responseDto) {
 		Long postId = (Long) joinPoint.getArgs()[0];
-		String cacheName = SimplePostService.postItemCacheName;
+		String cacheName = SimplePostService.POST_ITEM_CACHE_NAME;
 
 		Cache cachePostItem = cacheManager.getCache(cacheName);
 		if (Objects.isNull(cachePostItem)) return;
@@ -68,7 +68,7 @@ public class PostCachingAspect {
 			Pair<Long, Pageable> key = (Pair<Long, Pageable>) entry.getKey();
 
 			boolean isEquals = key.getKey().equals(r.author().id());
-			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, rootCommentsCacheName, key);
+			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, ROOT_COMMENTS_CACHE_NAME, key);
 			return isEquals;
 		});
 	}

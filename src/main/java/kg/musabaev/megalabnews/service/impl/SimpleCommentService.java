@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class SimpleCommentService implements CommentService {
 
-	public static final String childCommentsCacheName = "childCommentList";
-	public static final String rootCommentsCacheName = "rootCommentList";
+	public static final String CHILD_COMMENTS_CACHE_NAME = "childCommentList";
+	public static final String ROOT_COMMENTS_CACHE_NAME = "rootCommentList";
 
 	private final CommentRepo commentRepo;
 	private final CommentMapper commentMapper;
@@ -49,7 +49,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(value = rootCommentsCacheName, keyGenerator = "pairCacheKeyGenerator")
+	@Cacheable(value = ROOT_COMMENTS_CACHE_NAME, keyGenerator = "pairCacheKeyGenerator")
 	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 
@@ -58,7 +58,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(value = childCommentsCacheName, keyGenerator = "childCommentCacheKeyGenerator")
+	@Cacheable(value = CHILD_COMMENTS_CACHE_NAME, keyGenerator = "childCommentCacheKeyGenerator")
 	public Page<CommentListView> getChildrenByParentId(Long postId, Long parentCommentId, Pageable pageable) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		Utils.assertCommentExistsByIdOrElseThrow(postId, parentCommentId);
