@@ -33,7 +33,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 
-import static kg.musabaev.megalabnews.util.Utils.*;
+import static kg.musabaev.megalabnews.util.Utils.assertPostExistsByIdOrElseThrow;
+import static kg.musabaev.megalabnews.util.Utils.assertUserExistsByIdOrElseThrow;
 
 @Service
 @RequiredArgsConstructor
@@ -75,8 +76,6 @@ public class SimpleUserService implements UserService {
 	public void addToFavouritePosts(Long userId, AddToFavouritePostsRequest dto) {
 		assertUserExistsByIdOrElseThrow(userId);
 		assertPostExistsByIdOrElseThrow(dto.postId());
-		if (isAuthenticatedUser(userRepo.findUsernameByUserId(userId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 		try {
 			userRepo.insertIntoFavouritePosts(userId, dto.postId());
@@ -89,8 +88,6 @@ public class SimpleUserService implements UserService {
 	@Transactional
 	public void deleteFromFavouritePosts(Long userId, Long postId) {
 		assertUserExistsByIdOrElseThrow(userId);
-		if (isAuthenticatedUser(userRepo.findUsernameByUserId(userId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 		userRepo.deleteFromFavouritePosts(userId, postId);
 	}
@@ -109,8 +106,6 @@ public class SimpleUserService implements UserService {
 	@Cacheable(cacheNames = USER_CREATED_POSTS_CACHE_NAME, keyGenerator = "pairCacheKeyGenerator")
 	public Page<PostListView> getAllCreatedPostsByUserId(Long userId, Pageable pageable) {
 		assertUserExistsByIdOrElseThrow(userId);
-		if (isAuthenticatedUser(userRepo.findUsernameByUserId(userId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 		return postRepo.findAllByAuthorId(userId, pageable);
 	}
@@ -120,8 +115,6 @@ public class SimpleUserService implements UserService {
 	@CacheEvict(cacheNames = USER_ITEM_CACHE_NAME, key = "#userId")
 	public UpdateUserResponse update(Long userId, UpdateUserRequest dto) {
 		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusException(HttpStatus.CONFLICT);
-		if (isAuthenticatedUser(userRepo.findUsernameByUserId(userId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 		return userRepo.findById(userId).map(user -> {
 			userMapper.update(dto, user);
@@ -156,8 +149,6 @@ public class SimpleUserService implements UserService {
 			@CacheEvict(cacheNames = USER_PICTURE_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long userId) {
 		assertUserExistsByIdOrElseThrow(userId);
-		if (isAuthenticatedUser(userRepo.findUsernameByUserId(userId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 		postRepo.findAllPostsIdByAuthorId(userId).forEach(postRepo::deleteById);
 		deleteImageInStorageIfExists(Utils.getLastPathSegmentOrNull(userRepo.findUserPictureByUserId(userId)));

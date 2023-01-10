@@ -37,7 +37,6 @@ import java.util.Set;
 import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_CREATED_POSTS_CACHE_NAME;
 import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_FAVOURITE_POSTS_CACHE_NAME;
 import static kg.musabaev.megalabnews.util.Utils.getLastPathSegmentOrNull;
-import static kg.musabaev.megalabnews.util.Utils.isAuthenticatedUser;
 
 @Service
 @Log4j2
@@ -106,8 +105,6 @@ public class SimplePostService implements PostService {
 			@CacheEvict(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
-		if (!isAuthenticatedUser(postRepo.findAuthorUsernameByPostId(postId)))
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		deleteImageInStorageIfExists(
 				getLastPathSegmentOrNull(postRepo.findPostImageUrlByPostId(postId)));
 		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
@@ -126,9 +123,6 @@ public class SimplePostService implements PostService {
 			@CacheEvict(cacheNames = POST_IMAGE_CACHE_NAME, allEntries = true)})
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
-			if (!isAuthenticatedUser(post.getAuthor().getUsername()))
-				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
 			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
 			String postImageFilename = getLastPathSegmentOrNull(post.getImageUrl());
