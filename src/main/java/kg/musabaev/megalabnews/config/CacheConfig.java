@@ -37,8 +37,8 @@ public class CacheConfig {
 	}
 
 	@Bean
-	public KeyGenerator rootCommentCacheKeyGenerator() {
-		return new RootCommentCacheKeyGenerator();
+	public KeyGenerator pairCacheKeyGenerator() {
+		return new PairCacheKeyGenerator();
 	}
 
 	@Bean
@@ -46,7 +46,7 @@ public class CacheConfig {
 		return new ChildCommentCacheKeyGenerator();
 	}
 
-	private static class RootCommentCacheKeyGenerator extends SimpleKeyGenerator {
+	private static class PairCacheKeyGenerator extends SimpleKeyGenerator {
 		@Override
 		public Object generate(Object target, Method method, Object... params) {
 			return super.generate(target, method, Pair.of(params[0], params[1]));

@@ -9,10 +9,9 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,7 @@ import static kg.musabaev.megalabnews.service.impl.SimpleCommentService.rootComm
 @Aspect
 @RequiredArgsConstructor
 @Log4j2
-@ConditionalOnBean(ConcurrentMapCacheManager.class)
+@ConditionalOnExpression("${app.cache-enabled} == true")
 public class CommentCachingAspect {
 
 	public static final String CACHE_DELETED_BY_KEY = "Удалено значение у кэша {} по ключу {}";
@@ -60,7 +59,7 @@ public class CommentCachingAspect {
 		ConcurrentMap<Object, Object> store = getStoreFromCacheManager(rootCommentsCacheName);
 
 		store.entrySet().removeIf(entry -> {
-			var pair = (Pair<Long, Pageable>) entry.getKey(); // key
+			var pair = (Pair<Long, Pageable>) entry.getKey();
 
 			boolean isEquals = pair.getKey().equals(postId);
 			if (isEquals) log.debug(CACHE_DELETED_BY_KEY, rootCommentsCacheName, pair);

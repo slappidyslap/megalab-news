@@ -10,6 +10,15 @@ public record NewOrUpdatePostResponse(
 		LocalDate createdDate,
 		Set<String> tags,
 		String content,
-		String imageUrl
+		String imageUrl,
+		UserInfo author
 ) {
+	public record UserInfo(
+			Long id,
+			String name,
+			String surname,
+			String username,
+			String userPictureUrl
+	) {
+	}
 }

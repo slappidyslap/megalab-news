@@ -17,6 +17,9 @@ import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,6 +42,11 @@ import static kg.musabaev.megalabnews.util.Utils.assertUserExistsByIdOrElseThrow
 @Log4j2
 public class SimpleUserService implements UserService {
 
+	public static final String USER_ITEM_CACHE_NAME = "userItem";
+	public static final String USER_FAVOURITE_POSTS_CACHE_NAME = "userFavouritePosts";
+	public static final String USER_CREATED_POSTS_CACHE_NAME = "userCreatedPosts";
+	public static final String USER_PICTURE_CACHE_NAME = "userPicture";
+
 	private final UserRepo userRepo;
 	private final UserMapper userMapper;
 	private final PostRepo postRepo;
@@ -56,6 +64,7 @@ public class SimpleUserService implements UserService {
 	}
 
 	@Override
+	@Cacheable(USER_ITEM_CACHE_NAME)
 	public UserItemView getById(Long userId) {
 		return userRepo.findProjectedById(userId).orElseThrow(() -> {
 			throw new UserNotFoundException();
@@ -85,6 +94,7 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, keyGenerator = "pairCacheKeyGenerator")
 	public Page<PostListView> getAllFavouritePostsByUserId(Long userId, Pageable pageable) {
 		assertUserExistsByIdOrElseThrow(userId);
 
@@ -93,6 +103,7 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(cacheNames = USER_CREATED_POSTS_CACHE_NAME, keyGenerator = "pairCacheKeyGenerator")
 	public Page<PostListView> getAllCreatedPostsByUserId(Long userId, Pageable pageable) {
 		assertUserExistsByIdOrElseThrow(userId);
 
@@ -101,6 +112,7 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = USER_ITEM_CACHE_NAME, key = "#userId")
 	public UpdateUserResponse update(Long userId, UpdateUserRequest dto) {
 		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusException(HttpStatus.CONFLICT);
 
@@ -125,12 +137,16 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(USER_PICTURE_CACHE_NAME)
 	public Resource getUserPictureByFilename(String filename) {
 		return Utils.getUploadedFileByFilenameInStorage(filename, storage);
 	}
 
 	@Override
 	@Transactional
+	@Caching(evict = {
+			@CacheEvict(USER_ITEM_CACHE_NAME),
+			@CacheEvict(cacheNames = USER_PICTURE_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long userId) {
 		assertUserExistsByIdOrElseThrow(userId);
 

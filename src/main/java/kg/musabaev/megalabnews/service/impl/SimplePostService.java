@@ -9,6 +9,7 @@ import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
+import kg.musabaev.megalabnews.repository.UserRepo;
 import kg.musabaev.megalabnews.repository.projection.PostItemView;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.service.PostService;
@@ -33,6 +34,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.nio.file.Path;
 import java.util.Set;
 
+import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_CREATED_POSTS_CACHE_NAME;
+import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_FAVOURITE_POSTS_CACHE_NAME;
+
 @Service
 @Log4j2
 @Primary
@@ -45,6 +49,7 @@ public class SimplePostService implements PostService {
 
 	private final PostMapper postMapper;
 	private final PostRepo postRepo;
+	private final UserRepo userRepo;
 	private final CommentRepo commentRepo;
 
 	@Value("${app.storage.folder-name}")
@@ -61,7 +66,7 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	@Caching(evict = {
-			@CacheEvict(postListCacheName),
+			@CacheEvict(postListCacheName), //FIXME
 			@CacheEvict(value = postItemCacheName, key = "#result.id()")})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
@@ -94,12 +99,16 @@ public class SimplePostService implements PostService {
 	@Caching(evict = {
 			@CacheEvict(postItemCacheName),
 			@CacheEvict(cacheNames = postListCacheName, allEntries = true),
-			@CacheEvict(cacheNames = postImageCacheName, allEntries = true)})
+			@CacheEvict(cacheNames = postImageCacheName, allEntries = true),
+			@CacheEvict(cacheNames = USER_CREATED_POSTS_CACHE_NAME, allEntries = true), // FIXME
+			@CacheEvict(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long postId) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
 				Utils.getLastPathSegmentOrNull(postRepo.findPostImageUrlByPostId(postId)));
 		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
+		userRepo.deletePostsFromUserFavouritePosts(postId);
+
 		postRepo.deleteById(postId);
 	}
 

@@ -49,7 +49,7 @@ public class SimpleCommentService implements CommentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(value = rootCommentsCacheName, keyGenerator = "rootCommentCacheKeyGenerator")
+	@Cacheable(value = rootCommentsCacheName, keyGenerator = "pairCacheKeyGenerator")
 	public Page<CommentListView> getRootsByPostId(Long postId, Pageable pageable) {
 		Utils.assertPostExistsByIdOrElseThrow(postId);
 
