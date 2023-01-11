@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -52,10 +53,8 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
-				.exceptionHandling(registry -> {
-//					registry.authenticationEntryPoint((req, res, e) -> res.setStatus(HttpServletResponse.SC_UNAUTHORIZED));
-//					registry.accessDeniedHandler((req, res, e) -> res.setStatus(HttpServletResponse.SC_FORBIDDEN));
-				})
+				.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+				.and()
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

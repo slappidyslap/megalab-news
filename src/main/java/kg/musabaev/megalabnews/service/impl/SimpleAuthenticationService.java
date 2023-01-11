@@ -1,6 +1,8 @@
 package kg.musabaev.megalabnews.service.impl;
 
 import kg.musabaev.megalabnews.dto.*;
+import kg.musabaev.megalabnews.exception.ResponseStatusConflictException;
+import kg.musabaev.megalabnews.exception.ResponseStatusNotFoundException;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.mapper.UserMapper;
 import kg.musabaev.megalabnews.model.User;
@@ -55,7 +57,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	@Transactional
 	public AuthenticateOrRefreshResponse refresh(UpdateTokenRequest request) {
 		RefreshToken refreshToken = refreshTokenRepo.findByToken(request.refreshToken()).orElseThrow(() -> {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusNotFoundException();
 		});
 		refreshTokenRepo.deleteById(refreshToken.getId());
 
@@ -69,7 +71,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	@Transactional
 	public RegisterUserResponse register(RegisterUserRequest request) {
 		if (userRepo.existsByUsername(request.username()))
-			throw new ResponseStatusException(HttpStatus.CONFLICT);
+			throw new ResponseStatusConflictException();
 
 		User newUser = userMapper.toModel(request);
 		newUser.setPassword(passwordEncoder.encode(request.password()));

@@ -2,9 +2,7 @@ package kg.musabaev.megalabnews.util;
 
 import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.controller.PostController;
-import kg.musabaev.megalabnews.exception.CommentNotFoundException;
-import kg.musabaev.megalabnews.exception.PostNotFoundException;
-import kg.musabaev.megalabnews.exception.UserNotFoundException;
+import kg.musabaev.megalabnews.exception.*;
 import kg.musabaev.megalabnews.model.Comment;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
@@ -96,11 +94,11 @@ public class Utils {
 			var image = new UrlResource(storage.resolve(filename).toUri());
 
 			if (!image.exists() || !image.isReadable()) {
-				throw new ResponseStatusException(NOT_FOUND);
+				throw new ResponseStatusNotFoundException();
 			}
 			return image;
 		} catch (MalformedURLException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+			throw new ResponseStatusInternalServerErrorException(e);
 		}
 	}
 
@@ -109,14 +107,14 @@ public class Utils {
 			Path storage,
 			Class<?> controller,
 			String methodName) {
-		if (!isValidImageFormat(file)) throw new ResponseStatusException(BAD_REQUEST);
+		if (!isValidImageFormat(file)) throw new ResponseStatusBadRequestException();
 		String uniqueFilename = getUniqueFilename(file);
 		Path pathToSave = storage.resolve(uniqueFilename);
 		String fileUrl = buildUrlForImageByMethodName(controller, methodName, uniqueFilename);
 		try {
 			file.transferTo(pathToSave);
 		} catch (IOException e) {
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+			throw new ResponseStatusInternalServerErrorException(e);
 		}
 		return fileUrl;
 	}
@@ -220,12 +218,12 @@ public class Utils {
 		String imageFormat;
 		try {
 			String originalFilename = image.getOriginalFilename();
-			if (originalFilename == null) throw new ResponseStatusException(BAD_REQUEST);
+			if (originalFilename == null) throw new ResponseStatusBadRequestException();
 
 			imageFormat = Files.probeContentType(Path.of(originalFilename));
 		} catch (IOException e) {
 			log.warn("Произошла ошибка при получение формата изображения", e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+			throw new ResponseStatusInternalServerErrorException(e);
 		}
 		return validImageFormats.contains(imageFormat);
 	}
@@ -243,7 +241,7 @@ public class Utils {
 			).toUriString();
 		} catch (IllegalArgumentException e) {
 			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
-			throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "", e);
+			throw new ResponseStatusInternalServerErrorException(e);
 		}
 	}
 

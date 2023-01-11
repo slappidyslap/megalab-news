@@ -5,6 +5,7 @@ import kg.musabaev.megalabnews.controller.UserController;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
+import kg.musabaev.megalabnews.exception.ResponseStatusConflictException;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.mapper.UserMapper;
 import kg.musabaev.megalabnews.repository.PostRepo;
@@ -25,11 +26,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 
@@ -80,7 +79,7 @@ public class SimpleUserService implements UserService {
 		try {
 			userRepo.insertIntoFavouritePosts(userId, dto.postId());
 		} catch (DataIntegrityViolationException e) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT);
+			throw new ResponseStatusConflictException();
 		}
 	}
 
@@ -114,7 +113,7 @@ public class SimpleUserService implements UserService {
 	@Transactional
 	@CacheEvict(cacheNames = USER_ITEM_CACHE_NAME, key = "#userId")
 	public UpdateUserResponse update(Long userId, UpdateUserRequest dto) {
-		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusException(HttpStatus.CONFLICT);
+		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusConflictException();
 
 		return userRepo.findById(userId).map(user -> {
 			userMapper.update(dto, user);

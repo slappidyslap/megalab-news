@@ -5,6 +5,7 @@ import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.exception.PostNotFoundException;
+import kg.musabaev.megalabnews.exception.ResponseStatusConflictException;
 import kg.musabaev.megalabnews.mapper.PostMapper;
 import kg.musabaev.megalabnews.model.Post;
 import kg.musabaev.megalabnews.repository.CommentRepo;
@@ -25,11 +26,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -71,7 +70,7 @@ public class SimplePostService implements PostService {
 			@CacheEvict(value = POST_ITEM_CACHE_NAME, key = "#result.id()")})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
-			throw new ResponseStatusException(HttpStatus.CONFLICT);
+			throw new ResponseStatusConflictException();
 		Post newPost = postMapper.toModel(newOrUpdatePostRequest);
 
 		return postMapper.toDto(postRepo.save(newPost));
