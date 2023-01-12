@@ -16,9 +16,9 @@ import java.lang.annotation.*;
 public @interface UrlOrNull {
 	String message() default "is not valid url";
 
-	Class<?>[] groups() default { };
+	Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default { };
+	Class<? extends Payload>[] payload() default {};
 
 	String protocol() default "";
 

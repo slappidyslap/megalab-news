@@ -23,7 +23,7 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/posts")
 @CrossOrigin(originPatterns = "*")
 public class PostController {
 
