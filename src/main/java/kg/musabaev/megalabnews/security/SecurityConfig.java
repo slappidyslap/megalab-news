@@ -47,10 +47,10 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				.authorizeHttpRequests()
-				.requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/register").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+				.requestMatchers("/api/auth/authenticate", "/api/auth/register").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
 				.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
@@ -69,7 +69,7 @@ public class SecurityConfig {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		return web -> web
 				.ignoring()
-				.requestMatchers("/h2-console/**", "/api-docs/**", "/swagger-ui**", "/actuator/**");
+				.requestMatchers("/h2-console/**", "/api-docs/**", "/swagger-ui/**", "/actuator/**");
 	}
 
 	@Bean
