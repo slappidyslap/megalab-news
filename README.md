@@ -1,5 +1,7 @@
 ## А что делать?
 
+Базовый url `http://54.178.81.72:8080`
+
 Все команды выполняются из bash
 
 Если русские символы не отображаются: 
@@ -76,3 +78,5 @@ https://stackoverflow.com/a/9843220/18215510
 https://www.youtube.com/watch?v=vQldMjSJ6-w&list=PLvTBThJr861y60LQrUGpJNPu3Nt2EeQsP
 
 https://stackoverflow.com/questions/43217424/storing-oauth-2-0-token-in-cache-and-validating-next-request-by-compare-it
+
+https://www.baeldung.com/spring-boot-app-as-a-service:
