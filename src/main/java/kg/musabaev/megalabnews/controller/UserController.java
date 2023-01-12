@@ -85,7 +85,7 @@ public class UserController {
 		Resource userPicture = userService.getUserPictureByFilename(filename);
 		return ResponseEntity
 				.ok()
-				.contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.contentType(Utils.getMediaTypeByFilename(filename))
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + userPicture.getFilename() + "\"")
 				.body(userPicture);
 	}

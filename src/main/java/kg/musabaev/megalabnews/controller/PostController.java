@@ -76,7 +76,7 @@ public class PostController {
 		Resource image = postService.getImageByFilename(imageFilename);
 		return ResponseEntity
 				.ok()
-				.contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.contentType(Utils.getMediaTypeByFilename(imageFilename))
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + image.getFilename() + "\"")
 				.body(image);
 	}

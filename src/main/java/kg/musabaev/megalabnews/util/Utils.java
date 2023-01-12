@@ -10,6 +10,7 @@ import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -117,6 +118,10 @@ public class Utils {
 			throw new ResponseStatusInternalServerErrorException(e);
 		}
 		return fileUrl;
+	}
+
+	public static MediaType getMediaTypeByFilename(String filename) {
+		return MediaType.parseMediaType(MimeMappings.DEFAULT.get(filename.substring(filename.lastIndexOf("."))));
 	}
 
 	public static String getLastPathSegmentOrNull(String url) {
