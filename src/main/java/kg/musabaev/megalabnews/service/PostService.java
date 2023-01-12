@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface PostService {
@@ -21,7 +22,7 @@ public interface PostService {
 
 	void deleteById(Long postId);
 
-	String uploadImage(MultipartFile image);
+	Map<String, String> uploadImage(MultipartFile image);
 
 	Resource getImageByFilename(String imageFilename);
 

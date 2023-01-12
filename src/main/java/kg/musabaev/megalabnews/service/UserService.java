@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 public interface UserService {
 
 	UserItemView getById(Long userId);
@@ -24,7 +26,7 @@ public interface UserService {
 
 	UpdateUserResponse update(Long userId, UpdateUserRequest dto);
 
-	String uploadUserPicture(MultipartFile userPicture);
+	Map<String, String> uploadUserPicture(MultipartFile userPicture);
 
 	Resource getUserPictureByFilename(String filename);
 

@@ -75,7 +75,8 @@ public class UserController {
 	}
 
 	@PostMapping("/user-pictures")
-	ResponseEntity<String> uploadUserPictureForUser(@RequestPart("user-picture") MultipartFile userPicture) {
+	@PreAuthorize("hasAuthority('WRITE_USER')")
+	ResponseEntity<Map<String, String>> uploadUserPictureForUser(@RequestPart("user-picture") MultipartFile userPicture) {
 		return ResponseEntity.ok(userService.uploadUserPicture(userPicture));
 	}
 

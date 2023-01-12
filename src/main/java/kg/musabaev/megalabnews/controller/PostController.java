@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -66,7 +67,7 @@ public class PostController {
 
 	@PostMapping("/images")
 	@PreAuthorize("hasAuthority('WRITE_POST')")
-	ResponseEntity<String> uploadImageForPost(@RequestPart(name = "image") MultipartFile image) {
+	ResponseEntity<Map<String, String>> uploadImageForPost(@RequestPart(name = "image") MultipartFile image) {
 		return ResponseEntity.ok(postService.uploadImage(image));
 	}
 

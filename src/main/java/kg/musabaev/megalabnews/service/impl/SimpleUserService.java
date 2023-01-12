@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 import static kg.musabaev.megalabnews.util.Utils.assertPostExistsByIdOrElseThrow;
 import static kg.musabaev.megalabnews.util.Utils.assertUserExistsByIdOrElseThrow;
@@ -126,12 +127,12 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional
-	public String uploadUserPicture(MultipartFile userPicture) {
-		return Utils.uploadFileAndGetUrlFromMethodName(
+	public Map<String, String> uploadUserPicture(MultipartFile userPicture) {
+		return Map.of("userPicture", Utils.uploadFileAndGetUrlFromMethodName(
 				userPicture,
 				storage,
 				UserController.class,
-				"getUserPictureByFilename");
+				"getUserPictureByFilename"));
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 
 import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_CREATED_POSTS_CACHE_NAME;
@@ -137,12 +138,12 @@ public class SimplePostService implements PostService {
 	}
 
 	@Override
-	public String uploadImage(MultipartFile image) {
-		return Utils.uploadFileAndGetUrlFromMethodName(
+	public Map<String, String> uploadImage(MultipartFile image) {
+		return Map.of("postImage", Utils.uploadFileAndGetUrlFromMethodName(
 				image,
 				storage,
 				PostController.class,
-				"getPostImageByFilename");
+				"getPostImageByFilename"));
 	}
 
 	@Override
