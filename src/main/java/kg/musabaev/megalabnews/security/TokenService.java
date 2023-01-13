@@ -2,6 +2,7 @@ package kg.musabaev.megalabnews.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import kg.musabaev.megalabnews.repository.RefreshTokenRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
@@ -32,10 +33,13 @@ public class TokenService {
 	@Value("${app.security.refresh-token-expiration-ms}")
 	private Long refreshTokenExpirationMs;
 	@Value("${app.security.secret-key}")
-	private char[] secretKey;
+	private char[] secretKeyAsCharArray;
 
-	private Key getSighInKey() {
-		return Keys.hmacShaKeyFor(StandardCharsets.UTF_8.encode(CharBuffer.wrap(secretKey)).array());
+	private Key secretKey;
+
+	@PostConstruct
+	private void init() {
+		secretKey = Keys.hmacShaKeyFor(StandardCharsets.UTF_8.encode(CharBuffer.wrap(secretKeyAsCharArray)).array());
 	}
 
 	public String generateAccessToken(String username) {
@@ -43,7 +47,7 @@ public class TokenService {
 				.setSubject(username)
 				.setIssuedAt(new Date())
 				.setExpiration(Date.from(Instant.now().plusMillis(accessTokenExpirationMs)))
-				.signWith(getSighInKey())
+				.signWith(secretKey)
 				.compact();
 	}
 
@@ -57,7 +61,7 @@ public class TokenService {
 	public String getUsernameByAccessToken(String accessToken) {
 		try {
 			return Jwts.parserBuilder()
-					.setSigningKey(getSighInKey())
+					.setSigningKey(secretKey)
 					.build()
 					.parseClaimsJws(accessToken)
 					.getBody()
