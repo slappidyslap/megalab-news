@@ -123,6 +123,8 @@ public class SimplePostService implements PostService {
 			@CacheEvict(cacheNames = POST_IMAGE_CACHE_NAME, allEntries = true)})
 	public NewOrUpdatePostResponse update(Long postId, NewOrUpdatePostRequest dto) {
 		return postRepo.findById(postId).map(post -> {
+			if (postRepo.existsByTitle(dto.title())) throw new ResponseStatusConflictException();
+
 			// если пред. название файла не совпадает с текущим, то удаляем пред. файл
 			String imageFilename = getLastPathSegmentOrNull(dto.imageUrl());
 			String postImageFilename = getLastPathSegmentOrNull(post.getImageUrl());
