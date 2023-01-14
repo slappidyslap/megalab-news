@@ -1,7 +1,8 @@
 spring:
   datasource:
     url: jdbc:h2:./dev;AUTO_SERVER=TRUE
-    password: sa
+    password: h2
+    username: h2
 
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -39,6 +40,11 @@ management:
 springdoc:
   api-docs:
     path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  override-with-generic-response: false
 
 app:
   cache-enabled: ${CACHE_ENABLED:false}
@@ -47,6 +53,6 @@ app:
     post-image-folder-name: ${POST_IMAGE_FOLDER_NAME:post-image}
     user-picture-folder-name: ${USER_PICTURE_FOLDER_NAME:user-picture}
   security:
-    access-token-expiration-ms: "#{${ACCESS_TOKEN_EXPIRATION_MS:1000 * 30}}"
+    access-token-expiration-ms: "#{${ACCESS_TOKEN_EXPIRATION_MS:1000 * 60 * 30}}"
     refresh-token-expiration-ms: "#{${REFRESH_TOKEN_EXPIRATION_MS:1000 * 60}}"
     secret-key: ${REFRESH_TOKEN_EXPIRATION_MS:2DS534KHJ234FD059FK34JK8920DQIWP423XZ4234X423CXJ75123FJD4KD423LS}

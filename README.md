@@ -80,3 +80,5 @@ https://www.youtube.com/watch?v=vQldMjSJ6-w&list=PLvTBThJr861y60LQrUGpJNPu3Nt2Ee
 https://stackoverflow.com/questions/43217424/storing-oauth-2-0-token-in-cache-and-validating-next-request-by-compare-it
 
 https://www.baeldung.com/spring-boot-app-as-a-service:
+
+https://www.baeldung.com/openapi-jwt-authentication
