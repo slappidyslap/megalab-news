@@ -34,7 +34,7 @@ public class UserController {
 
 	@PostMapping("/{userId}/favourite-posts")
 	@PreAuthorize("hasAuthority('WRITE_USER')")
-	void addPostToUserFavouritePosts(@PathVariable Long userId, @RequestBody AddToFavouritePostsRequest dto) {
+	void addPostToUserFavouritePosts(@PathVariable Long userId, @Valid @RequestBody AddToFavouritePostsRequest dto) {
 		userService.addToFavouritePosts(userId, dto);
 	}
 
@@ -63,7 +63,7 @@ public class UserController {
 	@PreAuthorize("hasAuthority('WRITE_USER')")
 	ResponseEntity<UpdateUserResponse> updateUserById(
 			@PathVariable Long userId,
-			@RequestBody UpdateUserRequest dto) {
+			@Valid @RequestBody UpdateUserRequest dto) {
 		return ResponseEntity.ok(userService.update(userId, dto));
 	}
 
