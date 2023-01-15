@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
+import static kg.musabaev.megalabnews.config.OpenApiConfig.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "Публикации", description = "Методы для работы с публикациями")
@@ -45,8 +46,6 @@ public class PostController {
 	private final PostService postService;
 
 
-	public static final String THEN_RETURNED_OBJECT_WITH_FOLLOWING_FIELDS = "то возвращается объект, содержащий следующие поля:";
-
 	public static final String OPERATION_DESC_REQUIRE_AUTHORITY
 			= """
 			| Для вызова этого метода требуется ключ доступа (accessToken) с authority `WRITE_POST`. |
@@ -58,10 +57,10 @@ public class PostController {
 	public static final String REQUEST_PARAM_DESC_VALID_FILE = "Изображение формата jpg/jpeg или png и размер которого не превышает 1MB.";
 
 	public static final String REQUEST_DESC_NEW_OR_UPDATE_POST = """
-			Если введенный заголок уже существует в базе, сгенерируется ошибка.
+			Если введенный заголовок уже существует в базе, сгенерируется ошибка.
 			* `title` - Заголовок публикации.
 			* `description` - Описание публикации.
-			* `content` - Содержание публикации.
+			* `content` - Содержимое публикации.
 			* `tags` - Список уникальных тегов публикации.
 			* `imageUrl` - Изображение публикации. Должно быть валидным url адрес на изображение или `null`.
 			""";
@@ -71,7 +70,7 @@ public class PostController {
 			""";
 	public static final String RESPONSE_DESC_IF_POST_ITEM = """
 			* `id` - Идентификатор публикации.
-			* `content` - Содержание публикации.
+			* `content` - Содержимое публикации.
 			* `description` - Описание публикации.
 			* `tags` - Список уникальных тегов публикации.
 			* `title` - Заголовок публикации.
@@ -86,19 +85,10 @@ public class PostController {
 			""";
 	public static final String RESPONSE_DESC_IF_POST_NOT_FOUND = "Если публикация не найдена.";
 	public static final String RESPONSE_DESC_IF_POST_ALREADY_EXISTS = "Если публикация с таким `title` уже существует.";
-	public static final String RESPONSE_DESC_IF_REQUEST_BODY_NOT_VALID = "Если тело запроса не валидное.";
 	public static final String RESPONSE_DESC_IF_POST_UPDATED = "Если публикация успешно обновлена, " + THEN_RETURNED_OBJECT_WITH_FOLLOWING_FIELDS;
 	public static final String RESPONSE_DESC_IF_POST_SAVED = "Если публикация успешно сохранена, " + THEN_RETURNED_OBJECT_WITH_FOLLOWING_FIELDS;
 	public static final String RESPONSE_DESC_IF_POST_FOUND = "Если публикация найдена, " + THEN_RETURNED_OBJECT_WITH_FOLLOWING_FIELDS;
-	public static final String RESPONSE_DESC_IF_FILE_UPLOADED = """
-			Если файл успешно загружен, то возвращается объект, содержащий следующее поле:
-			* `fileUrl` - Ссылка на файл.
-			""";
-	public static final String RESPONSE_DESC_IF_FILE_RECEIVED =
-			"Если файл найден, то возвращается строковое представление изображения.";
 	public static final String RESPONSE_DESC_IF_POST_DELETED = "Если публикация успешно удалена.";
-	public static final String RESPONSE_DESC_IF_FILE_NOT_FOUND = "Если файл не найден.";
-
 
 	@Operation(
 			summary = "Создает новую публикацию.",
@@ -118,7 +108,7 @@ public class PostController {
 	}
 
 	@Operation(
-			summary = "Возвращает все публикации постранично.",
+			summary = "Возвращает постранично все публикации.",
 			responses = @ApiResponse(responseCode = "200", description = RESPONSE_DESC_IF_POST_PAGE_RECEIVED))
 	@GetMapping
 	ResponseEntity<Page<PostListView>> getAllPosts(
@@ -146,7 +136,7 @@ public class PostController {
 
 	@Operation(
 			summary = "Удаляет конкретную публикацию.",
-			description = OPERATION_DESC_REQUIRE_AUTHORITY + "При удалении, так же каскадно удалется комментарии этой публикации.",
+			description = OPERATION_DESC_REQUIRE_AUTHORITY + "При удалении, так же каскадно удаляется комментарии этой публикации.",
 			security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEMA_NAME),
 			responses = {
 					@ApiResponse(responseCode = "404", description = RESPONSE_DESC_IF_POST_NOT_FOUND),

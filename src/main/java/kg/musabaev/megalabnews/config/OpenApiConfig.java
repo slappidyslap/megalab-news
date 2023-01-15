@@ -59,6 +59,16 @@ public class OpenApiConfig {
 
 	public static final String SECURITY_SCHEMA_NAME = "accessToken";
 
+	public static final String RESPONSE_DESC_IF_REQUEST_BODY_NOT_VALID = "Если тело запроса не валидное.";
+	public static final String THEN_RETURNED_OBJECT_WITH_FOLLOWING_FIELDS = "то возвращается объект, содержащий следующие поля:";
+	public static final String RESPONSE_DESC_IF_FILE_UPLOADED = """
+			Если файл успешно загружен, то возвращается объект, содержащий следующее поле:
+			* `fileUrl` - Ссылка на файл.
+			""";
+	public static final String RESPONSE_DESC_IF_FILE_RECEIVED =
+			"Если файл найден, то возвращается строковое представление изображения.";
+	public static final String RESPONSE_DESC_IF_FILE_NOT_FOUND = "Если файл не найден.";
+
 	@Bean
 	public OpenApiCustomizer openAPI() {
 		Schema pageSchema = ModelConverters.getInstance().readAllAsResolvedSchema(Page.class).schema;

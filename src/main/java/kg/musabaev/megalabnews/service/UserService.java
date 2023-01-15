@@ -3,14 +3,13 @@ package kg.musabaev.megalabnews.service;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
+import kg.musabaev.megalabnews.dto.UploadFileResponse;
 import kg.musabaev.megalabnews.repository.projection.PostListView;
 import kg.musabaev.megalabnews.repository.projection.UserItemView;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 public interface UserService {
 
@@ -26,7 +25,7 @@ public interface UserService {
 
 	UpdateUserResponse update(Long userId, UpdateUserRequest dto);
 
-	Map<String, String> uploadUserPicture(MultipartFile userPicture);
+	UploadFileResponse uploadUserPicture(MultipartFile userPicture);
 
 	Resource getUserPictureByFilename(String filename);
 

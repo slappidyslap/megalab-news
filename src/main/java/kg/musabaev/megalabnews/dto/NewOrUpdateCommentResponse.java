@@ -11,7 +11,7 @@ public record NewOrUpdateCommentResponse(
 		LocalDate createdDate
 ) {
 	public record UserInfo(
-			String id, // FIXME
+			String id,
 			String name,
 			String surname,
 			String username,

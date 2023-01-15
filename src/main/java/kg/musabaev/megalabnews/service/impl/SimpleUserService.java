@@ -5,6 +5,7 @@ import kg.musabaev.megalabnews.controller.UserController;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
+import kg.musabaev.megalabnews.dto.UploadFileResponse;
 import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.exception.ResponseStatusConflictException;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
@@ -32,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
-import java.util.Map;
 
 
 @Service
@@ -126,8 +126,8 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional
-	public Map<String, String> uploadUserPicture(MultipartFile userPicture) {
-		return Map.of("userPicture", Utils.uploadFileAndGetUrlFromMethodName(
+	public UploadFileResponse uploadUserPicture(MultipartFile userPicture) {
+		return new UploadFileResponse(Utils.uploadFileAndGetUrlFromMethodName(
 				userPicture,
 				storage,
 				UserController.class,

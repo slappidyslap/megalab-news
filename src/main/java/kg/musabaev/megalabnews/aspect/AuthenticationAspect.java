@@ -1,6 +1,6 @@
 package kg.musabaev.megalabnews.aspect;
 
-import kg.musabaev.megalabnews.exception.ResponseStatusUnauthorizedException;
+import kg.musabaev.megalabnews.exception.ResponseStatusForbiddenException;
 import kg.musabaev.megalabnews.repository.CommentRepo;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
@@ -44,14 +44,14 @@ public class AuthenticationAspect {
 	void beforeMethodInCommentServiceVerifyAuthUserIsAuthor(JoinPoint jp) {
 		if (!isAuthenticatedUser(
 				commentRepo.findAuthorUsernameByPostIdAndCommentId((Long) jp.getArgs()[0], (Long) jp.getArgs()[1])))
-			throw new ResponseStatusUnauthorizedException();
+			throw new ResponseStatusForbiddenException();
 	}
 
 	@Before("postService() && execution(* deleteById(..)) ||" +
 			"postService() && execution(* update(..))")
 	void beforeMethodInPostServiceVerifyAuthUserIsAuthor(JoinPoint jp) {
 		if (!isAuthenticatedUser(postRepo.findAuthorUsernameByPostId((Long) jp.getArgs()[0])))
-			throw new ResponseStatusUnauthorizedException();
+			throw new ResponseStatusForbiddenException();
 	}
 
 	@Before("userService() && execution(* addToFavouritePosts(..)) ||" +
@@ -61,6 +61,6 @@ public class AuthenticationAspect {
 			"userService() && execution(* deleteById(..))")
 	void beforeMethodInUserServiceVerifyAuthUserIsUser(JoinPoint jp) {
 		if (!isAuthenticatedUser(userRepo.findUsernameByUserId((Long) jp.getArgs()[0])))
-			throw new ResponseStatusUnauthorizedException();
+			throw new ResponseStatusForbiddenException();
 	}
 }

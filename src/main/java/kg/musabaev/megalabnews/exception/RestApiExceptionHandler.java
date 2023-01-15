@@ -56,6 +56,11 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 	void setInternalServerErrorStatusCode() {
 	}
 
+	@ExceptionHandler(ResponseStatusForbiddenException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	void setForbiddenStatusCode() {
+	}
+
 	@ExceptionHandler({
 			UserNotFoundException.class, PostNotFoundException.class,
 			CommentNotFoundException.class, ResponseStatusNotFoundException.class})
