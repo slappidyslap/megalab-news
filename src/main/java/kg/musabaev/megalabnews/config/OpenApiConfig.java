@@ -1,10 +1,19 @@
 package kg.musabaev.megalabnews.config;
 
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.media.Schema;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import java.util.Map;
 
 
 @Configuration
@@ -42,9 +51,51 @@ import org.springframework.context.annotation.Configuration;
 				""",
 		version = "0.1"))
 @SecurityScheme(
-		name = "accessToken",
+		name = OpenApiConfig.SECURITY_SCHEMA_NAME,
 		type = SecuritySchemeType.HTTP,
 		bearerFormat = "JWT",
 		scheme = "Bearer")
 public class OpenApiConfig {
+
+	public static final String SECURITY_SCHEMA_NAME = "accessToken";
+
+	@Bean
+	public OpenApiCustomizer openAPI() {
+		Schema pageSchema = ModelConverters.getInstance().readAllAsResolvedSchema(Page.class).schema;
+		pageSchema.set$ref("Page");
+		Map<String, Schema> pageProperties = pageSchema.getProperties();
+		pageProperties.get("totalElements").description("Общее кол-во элементов.");
+		pageProperties.get("totalPages").description("Общее кол-во страниц.");
+		pageProperties.get("numberOfElements").description("Кол-во элементов в полученной странице.");
+		pageProperties.get("size").description("Максимальное число элементов, которые могут содержаться на одной странице. Равен query-параметру `size`");
+		pageProperties.get("number").description("Номер страницы. Равен query-параметру `page`");
+		pageProperties.get("first").description("Является ли полученная страница первой.");
+		pageProperties.get("last").description("Является ли полученная страница последней.");
+		pageProperties.get("empty").description("Пустая ли полученная страница.");
+		pageProperties.get("content").description("Список элементов (содержимое страницы).");
+		pageProperties.get("sort").description("Метаданные о сортировке.");
+		pageProperties.get("pageable").description("Метаданные о странице.");
+
+		Schema sortSchema = ModelConverters.getInstance().readAllAsResolvedSchema(Sort.class).schema;
+		Map<String, Schema> sortProperties = sortSchema.getProperties();
+		sortProperties.get("empty").description("Пустой ли параметры сортировки.");
+		sortProperties.get("sorted").description("Отсортирован ли элементы.");
+		sortProperties.get("unsorted").description("Обратное к `sorted`.");
+
+		Schema pageableSchema = ModelConverters.getInstance().readAllAsResolvedSchema(Pageable.class).schema;
+		Map<String, Schema> pageableProperties = pageableSchema.getProperties();
+		pageableProperties.get("pageNumber").description("Эквивалентен `number`.");
+		pageableProperties.get("sort").description("Эквивалентен `sort`.");
+		pageableProperties.get("offset").description("Смещение, необходимое для выборки определённого множества элементов. Равен по формуле `pageSize * pageNumber`.");
+		pageableProperties.get("pageNumber").description("Эквивалентен `number`.");
+		pageableProperties.get("pageSize").description("Эквивалентен `size`.");
+		pageableProperties.get("paged").description("Разбита ли элементы на страницы.");
+		pageableProperties.get("unpaged").description("Обратное к `paged`.");
+
+		return openApi -> openApi
+				.getComponents()
+				.addSchemas("Page", pageSchema)
+				.addSchemas("Pageable", pageableSchema)
+				.addSchemas("Sort", sortSchema);
+	}
 }
