@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import kg.musabaev.megalabnews.config.OpenApiConfig;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostResponse;
 import kg.musabaev.megalabnews.dto.UploadFileResponse;
@@ -102,7 +103,7 @@ public class PostController {
 	@Operation(
 			summary = "Создает новую публикацию.",
 			description = OPERATION_DESC_REQUIRE_AUTHORITY,
-			security = @SecurityRequirement(name = "accessToken"),
+			security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEMA_NAME),
 			requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = REQUEST_DESC_NEW_OR_UPDATE_POST),
 			responses = {
 					@ApiResponse(responseCode = "201", description = RESPONSE_DESC_IF_POST_SAVED + "\n" + RESPONSE_DESC_IF_POST_ITEM),
@@ -146,7 +147,7 @@ public class PostController {
 	@Operation(
 			summary = "Удаляет конкретную публикацию.",
 			description = OPERATION_DESC_REQUIRE_AUTHORITY + "При удалении, так же каскадно удалется комментарии этой публикации.",
-			security = @SecurityRequirement(name = "accessToken"),
+			security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEMA_NAME),
 			responses = {
 					@ApiResponse(responseCode = "404", description = RESPONSE_DESC_IF_POST_NOT_FOUND),
 					@ApiResponse(responseCode = "204", description = RESPONSE_DESC_IF_POST_DELETED)})
@@ -163,7 +164,7 @@ public class PostController {
 	@Operation(
 			summary = "Редактирует конкретную публикацию.",
 			description = OPERATION_DESC_REQUIRE_AUTHORITY,
-			security = @SecurityRequirement(name = "accessToken"),
+			security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEMA_NAME),
 			requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = REQUEST_DESC_NEW_OR_UPDATE_POST),
 			responses = {
 					@ApiResponse(responseCode = "200", description = RESPONSE_DESC_IF_POST_UPDATED + "\n" + RESPONSE_DESC_IF_POST_ITEM),
@@ -183,7 +184,7 @@ public class PostController {
 	@Operation(
 			summary = "Загружает новое изображение публикации.",
 			description = OPERATION_DESC_REQUIRE_AUTHORITY,
-			security = @SecurityRequirement(name = "accessToken"),
+			security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEMA_NAME),
 			responses = @ApiResponse(responseCode = "200", description = RESPONSE_DESC_IF_FILE_UPLOADED))
 	@PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasAuthority('WRITE_POST')")
