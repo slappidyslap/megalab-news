@@ -4,9 +4,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.repository.RefreshTokenRepo;
 import kg.musabaev.megalabnews.repository.UserRepo;
-import kg.musabaev.megalabnews.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +72,7 @@ public class TokenService {
 	}
 
 	public String generateRefreshToken(Long userId) {
-		Utils.assertUserExistsByIdOrElseThrow(userId);
+		assertUserExistsByIdOrElseThrow(userId);
 
 		return refreshTokenRepo.findByOwnerId(userId).map(refreshToken -> {
 			refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenExpirationMs));
@@ -85,5 +85,9 @@ public class TokenService {
 						UUID.randomUUID().toString(),
 						Instant.now().plusMillis(refreshTokenExpirationMs)))
 				.getToken());
+	}
+
+	private void assertUserExistsByIdOrElseThrow(Long userId) {
+		if (!userRepo.existsById(userId)) throw new UserNotFoundException();
 	}
 }

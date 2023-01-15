@@ -1,13 +1,7 @@
 package kg.musabaev.megalabnews.util;
 
-import jakarta.annotation.PostConstruct;
 import kg.musabaev.megalabnews.controller.PostController;
 import kg.musabaev.megalabnews.exception.*;
-import kg.musabaev.megalabnews.model.Comment;
-import kg.musabaev.megalabnews.model.Post;
-import kg.musabaev.megalabnews.repository.CommentRepo;
-import kg.musabaev.megalabnews.repository.PostRepo;
-import kg.musabaev.megalabnews.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.web.server.MimeMappings;
@@ -47,48 +41,6 @@ public class Utils {
 			MediaType.IMAGE_JPEG_VALUE,
 			MediaType.IMAGE_PNG_VALUE
 	);
-
-	private static PostRepo postRepo;
-	private static CommentRepo commentRepo;
-	private static UserRepo userRepo;
-
-	private final PostRepo _postRepo;
-	private final CommentRepo _commentRepo;
-	private final UserRepo _userRepo;
-
-	public static Post getPostReferenceByIdOrElseThrow(Long postId) {
-		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
-		return postRepo.getReferenceById(postId);
-	}
-
-	public static void assertPostExistsByIdOrElseThrow(Long postId) {
-		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
-	}
-
-	public static Comment getCommentReferenceByIdOrElseThrow(Long postId, Long commentId) {
-		if (!commentRepo.existsByIdAndPostId(commentId, postId))
-			throw new CommentNotFoundException();
-		return commentRepo.getReferenceById(commentId);
-	}
-
-	public static void assertCommentExistsByIdOrElseThrow(Long postId, Long commentId) {
-		if (!commentRepo.existsByIdAndPostId(commentId, postId))
-			throw new CommentNotFoundException();
-	}
-
-	public static void assertUserExistsByIdOrElseThrow(Long userId) {
-		if (!userRepo.existsById(userId))
-			throw new UserNotFoundException();
-	}
-
-	public static void deleteCommentsRecursively(Long postId, List<Long> commentsId) {
-		if (commentsId.isEmpty()) return;
-		for (Long commentId : commentsId) {
-			deleteCommentsRecursively(
-					postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
-			commentRepo.deleteById(commentId);
-		}
-	}
 
 	public static Resource getUploadedFileByFilenameInStorage(String filename, Path storage) {
 		try {
@@ -248,12 +200,5 @@ public class Utils {
 			log.warn("Не удалось найти метод у %s с именем %s".formatted(PostController.class, methodName), e);
 			throw new ResponseStatusInternalServerErrorException(e);
 		}
-	}
-
-	@PostConstruct
-	public void init() {
-		postRepo = _postRepo;
-		commentRepo = _commentRepo;
-		userRepo = _userRepo;
 	}
 }

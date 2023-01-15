@@ -5,6 +5,7 @@ import kg.musabaev.megalabnews.controller.UserController;
 import kg.musabaev.megalabnews.dto.AddToFavouritePostsRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserRequest;
 import kg.musabaev.megalabnews.dto.UpdateUserResponse;
+import kg.musabaev.megalabnews.exception.PostNotFoundException;
 import kg.musabaev.megalabnews.exception.ResponseStatusConflictException;
 import kg.musabaev.megalabnews.exception.UserNotFoundException;
 import kg.musabaev.megalabnews.mapper.UserMapper;
@@ -33,8 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 import java.util.Map;
 
-import static kg.musabaev.megalabnews.util.Utils.assertPostExistsByIdOrElseThrow;
-import static kg.musabaev.megalabnews.util.Utils.assertUserExistsByIdOrElseThrow;
 
 @Service
 @RequiredArgsConstructor
@@ -163,5 +162,13 @@ public class SimpleUserService implements UserService {
 				storage,
 				() -> log.debug("Изображение пользователя с названием {} удален", filename),
 				exception -> log.warn("Произошла ошибка при удалении изображения пользователя", exception));
+	}
+
+	private void assertUserExistsByIdOrElseThrow(Long userId) {
+		if (!userRepo.existsById(userId)) throw new UserNotFoundException();
+	}
+
+	private void assertPostExistsByIdOrElseThrow(Long postId) {
+		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
 	}
 }

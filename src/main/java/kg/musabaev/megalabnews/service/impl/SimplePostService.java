@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 
 import static kg.musabaev.megalabnews.service.impl.SimpleUserService.USER_CREATED_POSTS_CACHE_NAME;
@@ -104,10 +105,10 @@ public class SimplePostService implements PostService {
 			@CacheEvict(cacheNames = USER_CREATED_POSTS_CACHE_NAME, allEntries = true), // FIXME
 			@CacheEvict(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long postId) {
-		Utils.assertPostExistsByIdOrElseThrow(postId);
+		assertPostExistsByIdOrElseThrow(postId);
 		deleteImageInStorageIfExists(
 				getLastPathSegmentOrNull(postRepo.findPostImageUrlByPostId(postId)));
-		Utils.deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
+		deleteCommentsRecursively(postId, commentRepo.getAllRootCommentId(postId));
 		userRepo.deletePostsFromUserFavouritePosts(postId);
 
 		postRepo.deleteById(postId);
@@ -161,5 +162,18 @@ public class SimplePostService implements PostService {
 				storage,
 				() -> log.debug("Изображение с названием {} удален", imageFilename),
 				exception -> log.warn("Произошла ошибка при удалении изображения", exception));
+	}
+
+	private void assertPostExistsByIdOrElseThrow(Long postId) {
+		if (!postRepo.existsById(postId)) throw new PostNotFoundException();
+	}
+
+	private void deleteCommentsRecursively(Long postId, List<Long> commentsId) {
+		if (commentsId.isEmpty()) return;
+		for (Long commentId : commentsId) {
+			deleteCommentsRecursively(
+					postId, commentRepo.getAllChildCommentIdByParentId(postId, commentId));
+			commentRepo.deleteById(commentId);
+		}
 	}
 }
