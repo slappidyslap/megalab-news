@@ -16,6 +16,11 @@ spring:
     multipart:
       max-file-size: 1MB
 
+logging:
+  file:
+    path: logs
+    name: logs/megalab-news-api.log
+
 management:
   endpoints:
     web:

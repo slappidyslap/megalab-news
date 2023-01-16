@@ -37,3 +37,4 @@ build/
 dump.*
 storage
 test-storage
+logs
