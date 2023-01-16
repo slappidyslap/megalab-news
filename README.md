@@ -6,4 +6,4 @@
 
 Развернут в AWS EC2 по URL: http://54.178.81.72:8080
 
-Swagger: http://54.178.81.72:8080/swagger-ui/index.html
+Swagger: http://54.178.81.72:8080/swagger-ui
