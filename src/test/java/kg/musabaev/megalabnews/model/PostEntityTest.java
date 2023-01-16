@@ -5,7 +5,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -17,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 
-@DataJpaTest
+//@DataJpaTest
 @ActiveProfiles("test")
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)

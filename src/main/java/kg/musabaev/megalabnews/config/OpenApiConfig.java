@@ -49,7 +49,7 @@ import java.util.Map;
 				статус код ответа от защищенного ресурса. В случае если и `refreshToken` \
 				тоже истек, то пользователю необходимо заново аутентифицироваться.
 				""",
-		version = "0.1"))
+		version = "1.0"))
 @SecurityScheme(
 		name = OpenApiConfig.SECURITY_SCHEMA_NAME,
 		type = SecuritySchemeType.HTTP,

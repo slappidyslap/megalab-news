@@ -42,6 +42,7 @@ import java.nio.file.Path;
 public class SimpleUserService implements UserService {
 
 	public static final String USER_ITEM_CACHE_NAME = "userItem";
+	public static final String USER_ITEM_BY_USERNAME_CACHE_NAME = "userItemByUsername";
 	public static final String USER_FAVOURITE_POSTS_CACHE_NAME = "userFavouritePosts";
 	public static final String USER_CREATED_POSTS_CACHE_NAME = "userCreatedPosts";
 	public static final String USER_PICTURE_CACHE_NAME = "userPicture";
@@ -111,7 +112,9 @@ public class SimpleUserService implements UserService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = USER_ITEM_CACHE_NAME, key = "#userId")
+	@Caching(evict = {
+			@CacheEvict(cacheNames = USER_ITEM_CACHE_NAME, key = "#userId"),
+			@CacheEvict(cacheNames = USER_ITEM_BY_USERNAME_CACHE_NAME, key = "#dto.username()")})
 	public UpdateUserResponse update(Long userId, UpdateUserRequest dto) {
 		if (userRepo.existsByUsername(dto.username())) throw new ResponseStatusConflictException();
 
@@ -145,6 +148,7 @@ public class SimpleUserService implements UserService {
 	@Transactional
 	@Caching(evict = {
 			@CacheEvict(USER_ITEM_CACHE_NAME),
+			@CacheEvict(USER_ITEM_BY_USERNAME_CACHE_NAME),
 			@CacheEvict(cacheNames = USER_PICTURE_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long userId) {
 		assertUserExistsByIdOrElseThrow(userId);

@@ -10,6 +10,7 @@ import kg.musabaev.megalabnews.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class TokenService {
 
 	@Nullable
 	public String getAccessTokenFromRequest(HttpServletRequest request) {
-		String authorization = request.getHeader("Authorization");
+		String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 		return authorization != null && authorization.startsWith("Bearer") ? authorization.substring(7) : null;
 	}
 

@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/megalab_news
-    password: 1
+    password: ${POSTGRES_PASSWORD}
     username: eld
 
   jpa:
@@ -14,7 +14,7 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 3MB
+      max-file-size: 1MB
 
 management:
   endpoints:
@@ -25,6 +25,11 @@ management:
 springdoc:
   api-docs:
     path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  override-with-generic-response: false
 
 app:
   cache-enabled: ${CACHE_ENABLED:true}
@@ -33,6 +38,6 @@ app:
     post-image-folder-name: ${POST_IMAGE_FOLDER_NAME:post-image}
     user-picture-folder-name: ${USER_PICTURE_FOLDER_NAME:user-picture}
   security:
-    access-token-expiration-ms: "#{${ACCESS_TOKEN_EXPIRATION_MS:1000 * 60}}"
-    refresh-token-expiration-ms: "#{${REFRESH_TOKEN_EXPIRATION_MS:1000 * 90}}"
+    access-token-expiration-ms: "#{${ACCESS_TOKEN_EXPIRATION_MS:1000 * 60 * 5}}"
+    refresh-token-expiration-ms: "#{${REFRESH_TOKEN_EXPIRATION_MS:1000 * 60 * 60 * 24 * 5}}"
     secret-key: ${REFRESH_TOKEN_EXPIRATION_MS:2DS534KHJ234FD059FK34JK8920DQIWP423XZ4234X423CXJ75123FJD4KD423LS}

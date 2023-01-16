@@ -1,6 +1,5 @@
 package kg.musabaev.megalabnews.exception;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,14 +15,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Map;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
 public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	void handleMaxUploadSizeExceededException(HttpServletResponse response) {
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
+	@ResponseStatus(BAD_REQUEST)
+	void handleMaxUploadSizeExceededException() {
 	}
 
 	/**
@@ -32,8 +32,8 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * сортируем по имени поля, которого не существует в этом типе
 	 */
 	@ExceptionHandler(PropertyReferenceException.class)
-	void handlePropertyReferenceException(HttpServletResponse response) {
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
+	@ResponseStatus(BAD_REQUEST)
+	void handlePropertyReferenceException() {
 	}
 
 	@ExceptionHandler(ResponseStatusConflictException.class)

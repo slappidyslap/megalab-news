@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static kg.musabaev.megalabnews.util.Utils.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Component
 @Aspect
@@ -132,9 +131,7 @@ public class PostServiceLoggingAspect {
 	)
 	void afterThrowingMethodUploadImage(Exception e) {
 		iterateChainOfChecks(e, List.of(
-				Utils.ifResponseStatusExceptionWithStatusOrElseLog(e, BAD_REQUEST, () -> {
-					log.debug(FILE_NOT_VALID_IMAGE_FORMAT);
-				}),
+				ifBadRequest(e,() -> log.debug(FILE_NOT_VALID_IMAGE_FORMAT)),
 				ifInternalServerError(e, () -> log.warn(ERROR_OCCURRED_WHILE_SAVING_IMAGE, e))
 		));
 	}

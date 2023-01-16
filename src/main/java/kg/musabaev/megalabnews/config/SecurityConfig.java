@@ -1,7 +1,11 @@
-package kg.musabaev.megalabnews.security;
+package kg.musabaev.megalabnews.config;
 
 import kg.musabaev.megalabnews.model.User;
 import kg.musabaev.megalabnews.repository.UserRepo;
+import kg.musabaev.megalabnews.security.SimpleUserDetails;
+import kg.musabaev.megalabnews.security.TokenFilter;
+import kg.musabaev.megalabnews.service.impl.SimpleUserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -19,6 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -47,7 +53,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				.authorizeHttpRequests()
-				.requestMatchers("/api/auth/authenticate", "/api/auth/register").permitAll()
+				.requestMatchers("/api/auth/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
@@ -89,8 +95,9 @@ public class SecurityConfig {
 				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
 			return Optional.of(authentication)
-					.map(a -> (UserDetailsImpl) a.getPrincipal())
-					.map(UserDetailsImpl::getUser)
+					.map(Authentication::getPrincipal)
+					.map(SimpleUserDetails.class::cast)
+					.map(SimpleUserDetails::getUser)
 					.map(User::getId)
 					.map(userRepo::getReferenceById);
 		};
@@ -98,11 +105,18 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return username -> userRepo.findByUsername(username)
-				.map(UserDetailsImpl::new)
-				.orElseThrow(() -> {
-					throw new UsernameNotFoundException("user not found by username");
-				});
+		return new UserDetailsService() {
+			@Override
+			@Cacheable(SimpleUserService.USER_ITEM_BY_USERNAME_CACHE_NAME)
+			@Transactional(readOnly = true)
+			public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+				return userRepo.findByUsername(username)
+						.map(SimpleUserDetails::new)
+						.orElseThrow(() -> {
+							throw new UsernameNotFoundException("user not found by username");
+						});
+			}
+		};
 	}
 
 	@Bean

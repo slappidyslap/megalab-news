@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
-public class UserDetailsImpl implements UserDetails {
+public class SimpleUserDetails implements UserDetails {
 
 	private final User user;
 

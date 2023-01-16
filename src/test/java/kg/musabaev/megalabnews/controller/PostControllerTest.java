@@ -3,7 +3,6 @@ package kg.musabaev.megalabnews.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.musabaev.megalabnews.Application;
 import kg.musabaev.megalabnews.dto.NewOrUpdatePostRequest;
 import kg.musabaev.megalabnews.repository.PostRepo;
 import lombok.AccessLevel;
@@ -12,7 +11,6 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -36,10 +34,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(
+/*@SpringBootTest(
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		classes = {Application.class, PostController.class}
-)
+)*/
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Log4j2

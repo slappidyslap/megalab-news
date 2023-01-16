@@ -68,7 +68,7 @@ public class SimplePostService implements PostService {
 	@Override
 	@Transactional
 	@Caching(evict = {
-			@CacheEvict(POST_LIST_CACHE_NAME), //FIXME
+			@CacheEvict(value = POST_LIST_CACHE_NAME, allEntries = true),
 			@CacheEvict(value = POST_ITEM_CACHE_NAME, key = "#result.id()")})
 	public NewOrUpdatePostResponse save(NewOrUpdatePostRequest newOrUpdatePostRequest) {
 		if (postRepo.existsByTitle(newOrUpdatePostRequest.title()))
@@ -102,7 +102,7 @@ public class SimplePostService implements PostService {
 			@CacheEvict(POST_ITEM_CACHE_NAME),
 			@CacheEvict(cacheNames = POST_LIST_CACHE_NAME, allEntries = true),
 			@CacheEvict(cacheNames = POST_IMAGE_CACHE_NAME, allEntries = true),
-			@CacheEvict(cacheNames = USER_CREATED_POSTS_CACHE_NAME, allEntries = true), // FIXME
+			@CacheEvict(cacheNames = USER_CREATED_POSTS_CACHE_NAME, allEntries = true),
 			@CacheEvict(cacheNames = USER_FAVOURITE_POSTS_CACHE_NAME, allEntries = true)})
 	public void deleteById(Long postId) {
 		assertPostExistsByIdOrElseThrow(postId);
