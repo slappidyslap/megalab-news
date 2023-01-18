@@ -240,4 +240,8 @@ class PostServiceTest {
 				).toList());
 	}
 
+	private PostListView createPostListViewBy(Post post) {
+		return projectionFactory.createProjection(PostListView.class, post);
+	}
+
 }
