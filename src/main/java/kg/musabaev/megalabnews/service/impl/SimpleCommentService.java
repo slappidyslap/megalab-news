@@ -79,9 +79,8 @@ public class SimpleCommentService implements CommentService {
 			comment.setContent(dto.content());
 
 			return commentRepo.save(comment);
-		}).orElseThrow(() -> {
-			throw new CommentNotFoundException();
-		});
+		}).orElseThrow(CommentNotFoundException::new);
+
 		return commentMapper.toDto(updatedComment);
 	}
 

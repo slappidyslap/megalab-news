@@ -66,9 +66,7 @@ public class SimpleUserService implements UserService {
 	@Override
 	@Cacheable(USER_ITEM_CACHE_NAME)
 	public UserItemView getById(Long userId) {
-		return userRepo.findProjectedById(userId).orElseThrow(() -> {
-			throw new UserNotFoundException();
-		});
+		return userRepo.findProjectedById(userId).orElseThrow(UserNotFoundException::new);
 	}
 
 	@Override
@@ -122,9 +120,7 @@ public class SimpleUserService implements UserService {
 			userMapper.update(dto, user);
 
 			return userMapper.toUpdateUserDto(userRepo.save(user));
-		}).orElseThrow(() -> {
-			throw new UserNotFoundException();
-		});
+		}).orElseThrow(UserNotFoundException::new);
 	}
 
 	@Override

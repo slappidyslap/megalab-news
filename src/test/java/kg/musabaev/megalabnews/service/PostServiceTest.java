@@ -49,7 +49,7 @@ class PostServiceTest {
 	PostMapper postMapper = Mappers.getMapper(PostMapper.class);
 
 	@InjectMocks
-	SimplePostService postService;
+	SimplePostService service;
 
 	final SpelAwareProxyProjectionFactory projectionFactory = new SpelAwareProxyProjectionFactory();
 
@@ -65,7 +65,7 @@ class PostServiceTest {
 
 		NewOrUpdatePostRequest newPostRequest = getNewOrUpdatePostRequest(title);
 
-		var newPostResponse = postService.save(newPostRequest);
+		var newPostResponse = service.save(newPostRequest);
 
 		assertThat(newPostRequest)
 				.usingRecursiveComparison()
@@ -82,7 +82,7 @@ class PostServiceTest {
 
 		when(postRepo.existsByTitle(title)).thenReturn(true);
 
-		assertThatThrownBy(() -> postService.save(getNewOrUpdatePostRequest(title)))
+		assertThatThrownBy(() -> service.save(getNewOrUpdatePostRequest(title)))
 				.isInstanceOf(ResponseStatusConflictException.class);
 
 		verify(postRepo, times(0)).save(any(Post.class));
@@ -93,7 +93,7 @@ class PostServiceTest {
 		when(postRepo.findAllByTagsIn(Set.of("Спорт"), PageRequest.ofSize(10)))
 				.thenReturn(getFilteredPosts());
 
-		Page<PostListView> filteredPosts = postService.getAll(PageRequest.ofSize(10), Set.of("Спорт"));
+		Page<PostListView> filteredPosts = service.getAll(PageRequest.ofSize(10), Set.of("Спорт"));
 
 		assertThat(filteredPosts.getContent()).hasSize(2);
 	}
@@ -103,7 +103,7 @@ class PostServiceTest {
 		when(postRepo.findAllProjectedBy(PageRequest.ofSize(10)))
 				.thenReturn(getPosts());
 
-		Page<PostListView> posts = postService.getAll(PageRequest.ofSize(10), null);
+		Page<PostListView> posts = service.getAll(PageRequest.ofSize(10), null);
 
 		assertThat(posts.getContent()).hasSize(4);
 	}
@@ -117,7 +117,7 @@ class PostServiceTest {
 		when(postRepo.findProjectedById(3L))
 				.thenReturn(Optional.of(exceptedPost));
 
-		PostItemView actualPost = postService.getById(3L);
+		PostItemView actualPost = service.getById(3L);
 
 		assertThat(actualPost.getTitle()).isEqualTo(exceptedPost.getTitle());
 	}
@@ -127,7 +127,7 @@ class PostServiceTest {
 		when(postRepo.findProjectedById(5L))
 				.thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> postService.getById(5L))
+		assertThatThrownBy(() -> service.getById(5L))
 				.isInstanceOf(PostNotFoundException.class);
 	}
 
@@ -136,7 +136,7 @@ class PostServiceTest {
 		Long id = 3L;
 		when(postRepo.existsById(id)).thenReturn(true);
 
-		assertThatCode(() -> postService.deleteById(id)).doesNotThrowAnyException();
+		assertThatCode(() -> service.deleteById(id)).doesNotThrowAnyException();
 
 		verify(postRepo, times(1)).deleteById(id);
 	}
@@ -146,7 +146,7 @@ class PostServiceTest {
 		Long id = 3L;
 		when(postRepo.existsById(id)).thenReturn(false);
 
-		assertThatCode(() -> postService.deleteById(id))
+		assertThatCode(() -> service.deleteById(id))
 				.isInstanceOf(PostNotFoundException.class);
 
 		verify(postRepo, times(0)).deleteById(id);
@@ -164,7 +164,7 @@ class PostServiceTest {
 		when(postMapper.toDto(persistedPost)).thenCallRealMethod();
 		when(postRepo.save(persistedPost)).then(i -> i.getArgument(0));
 
-		var updatePostResponse = postService.update(postId, updatePostRequest);
+		var updatePostResponse = service.update(postId, updatePostRequest);
 
 		assertThat(updatePostRequest)
 				.usingRecursiveComparison()
@@ -179,7 +179,7 @@ class PostServiceTest {
 		Long postId = 3L;
 		when(postRepo.findById(postId)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> postService.update(postId, any(NewOrUpdatePostRequest.class)))
+		assertThatThrownBy(() -> service.update(postId, any(NewOrUpdatePostRequest.class)))
 				.isInstanceOf(PostNotFoundException.class);
 
 		verify(postRepo, times(0)).save(any(Post.class));
@@ -195,7 +195,7 @@ class PostServiceTest {
 		when(postRepo.findById(postId)).thenReturn(Optional.of(persistedPost));
 		when(postRepo.existsByTitle(title)).thenReturn(true);
 
-		assertThatThrownBy(() -> postService.update(postId, updatePostRequest))
+		assertThatThrownBy(() -> service.update(postId, updatePostRequest))
 				.isInstanceOf(ResponseStatusConflictException.class);
 
 		verify(postRepo, times(0)).save(any(Post.class));

@@ -91,9 +91,7 @@ public class SimplePostService implements PostService {
 	@Transactional(readOnly = true)
 	@Cacheable(POST_ITEM_CACHE_NAME)
 	public PostItemView getById(Long postId) {
-		return postRepo.findProjectedById(postId).orElseThrow(() -> {
-			throw new PostNotFoundException();
-		});
+		return postRepo.findProjectedById(postId).orElseThrow(PostNotFoundException::new);
 	}
 
 	@Override
@@ -135,9 +133,7 @@ public class SimplePostService implements PostService {
 			postMapper.update(dto, post);
 
 			return postMapper.toDto(postRepo.save(post));
-		}).orElseThrow(() -> {
-			throw new PostNotFoundException();
-		});
+		}).orElseThrow(PostNotFoundException::new);
 	}
 
 	@Override
