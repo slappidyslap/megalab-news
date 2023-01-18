@@ -24,6 +24,8 @@ import java.util.Set;
 @ToString(exclude = "favouritePosts")
 @EqualsAndHashCode(of = "username")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,6 +50,7 @@ public class User {
 	@Column(name = "authority", nullable = false)
 	@Enumerated(EnumType.STRING)
 	@Fetch(FetchMode.SUBSELECT)
+	@Singular
 	Set<Authority> authorities = new HashSet<>();
 
 	@ManyToMany(
@@ -68,5 +71,6 @@ public class User {
 	List<Post> createdPosts = new ArrayList<>();
 
 	@Column(length = 2000)
-	String userPictureUrl = "https://i.pinimg.com/474x/20/0d/72/200d72a18492cf3d7adac8a914ef3520.jpg"; // FIXME
+	@Builder.Default
+	String userPictureUrl = "https://i.pinimg.com/474x/20/0d/72/200d72a18492cf3d7adac8a914ef3520.jpg";
 }

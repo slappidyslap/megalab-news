@@ -20,6 +20,8 @@ import java.util.Objects;
 @Setter
 @ToString(exclude = {"parent", "post", "commentator"})
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment {
 
 	@Id
@@ -30,9 +32,7 @@ public class Comment {
 	@ManyToOne(
 			fetch = FetchType.LAZY,
 			cascade = {
-					CascadeType.MERGE, CascadeType.PERSIST,
-					CascadeType.PERSIST, CascadeType.REFRESH
-			},
+					CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
 			optional = false)
 	@JoinColumn(name = "post_id", nullable = false, updatable = false)
 	Post post;
