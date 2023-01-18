@@ -82,3 +82,5 @@ https://stackoverflow.com/questions/43217424/storing-oauth-2-0-token-in-cache-an
 https://www.baeldung.com/spring-boot-app-as-a-service:
 
 https://www.baeldung.com/openapi-jwt-authentication
+
+https://stackoverflow.com/questions/47258103/mock-projection-result-spring-data-jpa
