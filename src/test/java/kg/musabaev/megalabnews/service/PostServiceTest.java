@@ -221,10 +221,8 @@ class PostServiceTest {
 
 	private Page<PostListView> getFilteredPosts() {
 		return new PageImpl<>(List.of(
-				projectionFactory.createProjection(PostListView.class,
-						Post.builder().id(3L).title("hello3").tags(Set.of("Спорт", "Наука")).build()),
-				projectionFactory.createProjection(PostListView.class,
-						Post.builder().id(4L).title("hello4").tags(Set.of("Спорт")).build())
+				createPostListViewBy(Post.builder().id(3L).title("hello3").tags(Set.of("Спорт", "Наука")).build()),
+				createPostListViewBy(Post.builder().id(4L).title("hello4").tags(Set.of("Спорт")).build())
 		));
 	}
 
@@ -232,10 +230,8 @@ class PostServiceTest {
 		return new PageImpl<>(
 				Stream.concat(
 						Stream.of(
-								projectionFactory.createProjection(PostListView.class,
-										Post.builder().id(1L).title("hello3").tags(Set.of("Развлечение")).build()),
-								projectionFactory.createProjection(PostListView.class,
-										Post.builder().id(2L).title("hello4").tags(Set.of("Политика")).build())),
+								createPostListViewBy(Post.builder().id(1L).title("hello3").tags(Set.of("Развлечение")).build()),
+								createPostListViewBy(Post.builder().id(2L).title("hello4").tags(Set.of("Политика")).build())),
 						getFilteredPosts().stream()
 				).toList());
 	}
