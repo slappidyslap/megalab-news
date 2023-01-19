@@ -47,18 +47,18 @@ public class SimpleAuthenticationService implements AuthenticationService {
 	public AuthenticateOrRefreshResponse authenticate(AuthenticateRequest request) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-		User foundUser = userRepo.findByUsername(request.username()).orElseThrow(() -> {
-			throw new UserNotFoundException();
-		});
+		User foundUser = userRepo
+				.findByUsername(request.username())
+				.orElseThrow(UserNotFoundException::new);
 		return buildAuthenticationResponse(foundUser);
 	}
 
 	@Override
 	@Transactional
 	public AuthenticateOrRefreshResponse refresh(UpdateTokenRequest request) {
-		RefreshToken refreshToken = refreshTokenRepo.findByToken(request.refreshToken()).orElseThrow(() -> {
-			throw new ResponseStatusNotFoundException();
-		});
+		RefreshToken refreshToken = refreshTokenRepo
+				.findByToken(request.refreshToken())
+				.orElseThrow(ResponseStatusNotFoundException::new);
 		refreshTokenRepo.deleteById(refreshToken.getId());
 
 		if (Instant.now().isAfter(refreshToken.getExpiryDate()))

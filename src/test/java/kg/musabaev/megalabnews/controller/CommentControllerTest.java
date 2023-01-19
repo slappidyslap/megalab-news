@@ -1,17 +1,16 @@
 package kg.musabaev.megalabnews.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kg.musabaev.megalabnews.Application;
 import kg.musabaev.megalabnews.dto.NewCommentRequest;
 import kg.musabaev.megalabnews.dto.UpdateCommentRequest;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,10 +24,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/*@SpringBootTest(
+@Disabled
+@SpringBootTest(
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-		classes = {Application.class, CommentController.class}
-)*/
+		classes = {Application.class, CommentController.class})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Log4j2

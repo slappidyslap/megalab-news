@@ -15,6 +15,8 @@ import java.time.Instant;
 @ToString(exclude = "owner")
 @EqualsAndHashCode(of = "token")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RefreshToken {
 
 	@Id

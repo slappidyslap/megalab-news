@@ -23,8 +23,10 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(exclude = {"tags"})
-@NoArgsConstructor
 @EqualsAndHashCode(of = {"title"})
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +37,7 @@ public class Post {
 	String title;
 
 	@Column(nullable = false, length = 500)
+	@Builder.Default
 	String description = "";
 
 	@CreatedBy
@@ -54,6 +57,7 @@ public class Post {
 	@CollectionTable(name = "posts_tags", joinColumns = @JoinColumn(name = "post_id"))
 	@Column(name = "tag")
 	@Fetch(FetchMode.SUBSELECT)
+	@Builder.Default
 	Set<String> tags = new HashSet<>();
 
 	@Lob
@@ -63,4 +67,7 @@ public class Post {
 	@Column(length = 2000)
 	@Nullable
 	String imageUrl;
+
+	/*public Post() {
+	}*/
 }

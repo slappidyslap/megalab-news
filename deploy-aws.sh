@@ -1,4 +1,4 @@
-./mvnw package -Dmaven.test.skip=true
+./mvnw clean package
 
 scp -i ~/.ssh/aws-eld-ec2.pem \
     ./target/*.jar \
