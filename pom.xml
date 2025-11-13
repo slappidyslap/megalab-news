@@ -10,7 +10,7 @@
     </parent>
     <groupId>kg.musabaev</groupId>
     <artifactId>megalab-news</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <name>megalab-news</name>
     <description>megalab-news</description>
     <properties>
